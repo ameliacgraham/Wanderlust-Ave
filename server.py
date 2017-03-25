@@ -44,6 +44,32 @@ def process_registation_form():
         db.session.commit()
     return redirect("/")
 
+@app.route('/login')
+def show_login():
+    """Displays login form"""
+
+    return render_template("login.html")
+
+@app.route('/login/process', methods=['POST'])
+def process_login_info():
+    """Checks if user email and password exist on same account, then logs in or redirects."""
+
+    username = request.form.get("username")
+    password = request.form.get("password")
+    
+    try:
+        user_query = User.query.filter(User.username==username).one()
+    except Exception, e:
+        user_query = False
+
+    if user_query and user_query.password == password:
+        session["username"] = user_query.username
+        flash("You have successfully logged in!")
+        return redirect("/my-lists")
+    else:
+        flash("Email or Password is incorrect. Please try again!")
+        return redirect("/login")
+
 
 if __name__ == "__main__":
 
