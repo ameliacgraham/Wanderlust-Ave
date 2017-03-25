@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+  <title>WanderList</title>
+  <script src="http:/code.jquery.js"></script>
+</head>
+
+<body>
+  Welcome to WanderList
+    <ul>
+    {% for message in get_flashed_messages() %}
+        <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  <hr>
+  
+  {% block content %} put your content here {% endblock %}
+
+</body>
+</html>

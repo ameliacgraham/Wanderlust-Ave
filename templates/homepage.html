@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+Hello, World!
+
+<p><a href="/register">Register</a></p>
+
+
+<div>
+  {% if public_items %}
+    {% for item in public_items %}
+      {{ item.title }}
+    {% endfor %}
+  {% endif %}
+</div>
+
+
+
+{% endblock %}
