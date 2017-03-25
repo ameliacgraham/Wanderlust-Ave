@@ -80,12 +80,28 @@ class PrivateItem(db.Model):
                                            order_by=list_id))
 
     def __repr__(self):
-        """Private bucket list items."""
+        """Provide helpful representation when printed."""
 
         return "<PrivateItem priv_item_id: {} list_id: {}>".format(self.priv_item_id,
                                                                    self.list_id)
 
-    
+class Journal(db.Model):
+    """Private bucket list items."""
 
+    __tablename__ = "journals"
 
+    journal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    priv_item_id = db.Column(db.Integer, db.ForeignKey("PrivateItem.priv_item_id"))
+    title = db.Column(db.String(100), nullable=True)
+    date = db.Column(db.DateTime, default=DateTime.now, nullable=False)
+
+    priv_item = db.relationship("PrivateItem",
+                                    backref=db.backref("journals",
+                                                order_by=priv_item_id))
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+        
+        return "<Journal journal_id: {} priv_item_id: {}>".format(self.journal_id,
+                                                                  self.title)  
 
