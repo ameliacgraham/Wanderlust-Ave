@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 db = SQLAlchemy()
 
 
@@ -68,7 +69,7 @@ class PrivateItem(db.Model):
     list_id = db.Column(db.Integer, db.ForeignKey("BucketList.list_id"))
     tour_link = db.Column(db.String(200), nullable=True)
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
-    date_created = db.Column(db.DateTime, default=DateTime.now, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
     date_completed = db.Column(db.DateTime, nullable=True)
 
     public_item = db.relationship("PublicItem",
@@ -93,7 +94,7 @@ class Journal(db.Model):
     journal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     priv_item_id = db.Column(db.Integer, db.ForeignKey("PrivateItem.priv_item_id"))
     title = db.Column(db.String(100), nullable=True)
-    date = db.Column(db.DateTime, default=DateTime.now, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     priv_item = db.relationship("PrivateItem",
                                     backref=db.backref("journals",
