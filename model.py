@@ -50,7 +50,7 @@ class PublicItem(db.Model):
 
     public_item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    location = db.Column(db.LatLon, nullable=False)
+    # location = db.Column(db.LatLon, nullable=False)
     image = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(300), nullable=True)
 
@@ -59,14 +59,22 @@ class PublicItem(db.Model):
 
         return "<Public Item public_item_id: {} title: {}>".format(self.public_item_id, self.title)
 
+def example_data():
+        """Create example data for the test database."""
+        #FIXME: write a function that creates a game and adds it to the database.
+        item1 = PublicItem(title='Visit The Eiffel Tower', 
+                image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg')
+        db.session.add(item1)
+        db.session.commit()
+
 class PrivateItem(db.Model):
     """Private bucket list items."""
 
     __tablename__ = "private_items"
 
     priv_item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    public_item_id = db.Column(db.Integer, db.ForeignKey("PublicItem.public_item_id"))
-    list_id = db.Column(db.Integer, db.ForeignKey("BucketList.list_id"))
+    public_item_id = db.Column(db.Integer, db.ForeignKey("public_items.public_item_id"))
+    list_id = db.Column(db.Integer, db.ForeignKey("bucket_lists.list_id"))
     tour_link = db.Column(db.String(200), nullable=True)
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -92,7 +100,7 @@ class Journal(db.Model):
     __tablename__ = "journals"
 
     journal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    priv_item_id = db.Column(db.Integer, db.ForeignKey("PrivateItem.priv_item_id"))
+    priv_item_id = db.Column(db.Integer, db.ForeignKey("private_items.priv_item_id"))
     title = db.Column(db.String(100), nullable=True)
     date = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
@@ -106,3 +114,23 @@ class Journal(db.Model):
         return "<Journal journal_id: {} priv_item_id: {}>".format(self.journal_id,
                                                                   self.title)  
 
+
+def connect_to_db(app):
+    """Connect the database to our Flask app."""
+
+    # Configure to use our PstgreSQL database
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///wander_list'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.app = app
+    db.init_app(app)
+
+
+if __name__ == "__main__":
+    # As a convenience, if we run this module interactively, it will leave
+    # you in a state of being able to work with the database directly.
+
+    from server import app
+    connect_to_db(app)
+    print "Connected to DB."
+    db.create_all()
+    example_data()
