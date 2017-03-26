@@ -6,7 +6,7 @@
 <div>
   {% if user_bucket_lists %}
     {% for list in user_bucket_lists %}
-      <a href="/my-lists/{{ list.title }}">{{ list.title }}
+      <a href="/my-lists/{{ list.list_id }}">{{ list.title }}
     {% endfor %}
   {% endif %}
 </div>
