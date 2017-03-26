@@ -71,6 +71,52 @@ def process_login_info():
         return redirect("/login")
 
 
+@app.route('/my-lists')
+def display_bucket_lists():
+    """Display users bucket lists."""
+
+    username = session["username"]
+    user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
+
+    return render_template("user-lists.html", user_bucket_lists=user_bucket_lists)
+
+@app.route('/my-lists/add-form')
+def display_add_list_form():
+    """Display form to add new bucket list."""
+
+    return render_template("add-list.html")
+
+
+@app.route('/my-lists/add')
+def add_bucket_list():
+    """Add new bucket list."""
+
+    title = request.form.get('title')
+    username = request.form.get('username')
+
+    try:
+        user_list = BucketList.query.filter(BucketList.username==username,
+                                            BucketList.title==title).one()
+    except Exception, e:
+        new_list = BucketList(username=username, title=title)
+        db.session.add(new_list)
+        db.session.commit()
+        flash("Your list has been created!")
+        return redirect('/my-lists')
+
+    flash("You already have a list named {}".format(title))
+    return redirect('/my-lists/add')
+
+@app.route('/my-lists/<title>')
+def display_bucket_list(title):
+    """Displays a user's bucket list."""
+
+    bucket_list = BucketList.query.filter(BucketList.title==title).one()
+
+    return render_template("bucket_list.html", bucket_list=bucket_list)
+
+
+
 if __name__ == "__main__":
 
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
