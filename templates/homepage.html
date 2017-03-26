@@ -14,7 +14,9 @@ Hello, World!
   {% if public_items %}
     {% for item in public_items %}
       {{ item.title }} <br>
-      <img src="{{ item.image }}" alt="Image" width="128" height="128"><br> 
+      <a href="/{{ item.public_item_id }}">
+        <img src="{{ item.image}}" alt="Bucket Item" width="128" height="128"><br> 
+      </a>
     {% endfor %}
   {% endif %}
 </div>

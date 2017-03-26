@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div>
+  {% if item_info %}
+    {{ item_info.title }} <br>
+    <img src="{{ item_info.image }}" alt="Image" width="128" height="128"><br>
+  {% endif %}
+</div>
+
+
+{% endblock %}
