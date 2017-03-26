@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+  {% if bucket_list %}
+    {% for item in bucket_list.priv_items %}
+      {{ item.title }}
+    {% endfor %}
+  {% endif %}
+</div>
+
+
+
+{% endblock %}

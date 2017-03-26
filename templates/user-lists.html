@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<p><a href="/my-lists/add-form">Create a new list</a></p>
+
+<div>
+  {% if user_bucket_lists %}
+    {% for list in user_bucket_lists %}
+      <a href="/my-lists/{{ list.title }}">{{ list.title }}
+    {% endfor %}
+  {% endif %}
+</div>
+
+
+
+{% endblock %}
