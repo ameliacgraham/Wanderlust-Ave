@@ -50,9 +50,11 @@ class PublicItem(db.Model):
 
     public_item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    # location = db.Column(db.LatLon, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(300), nullable=True)
+    retired = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -63,7 +65,9 @@ def example_data():
         """Create example data for the test database."""
         #FIXME: write a function that creates a game and adds it to the database.
         item1 = PublicItem(title='Visit The Eiffel Tower', 
-                image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg')
+                image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg',
+                latitude=48.858093,
+                longitude=2.294694)
         db.session.add(item1)
         db.session.commit()
 
