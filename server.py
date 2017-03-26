@@ -67,6 +67,14 @@ def process_login_info():
         flash("Email or Password is incorrect. Please try again!")
         return redirect("/login")
 
+@app.route('/logout')
+def log_user_out():
+    """Logs a user out."""
+
+    session = {}
+    flash("You have successfully logged out!")
+    return redirect("/")
+
 
 @app.route('/my-lists')
 def display_bucket_lists():
