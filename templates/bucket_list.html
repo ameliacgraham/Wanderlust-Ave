@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<p><a href="/add-item-form">Add a new item</a></p>
+
+
+
+
 <div>
   {% if bucket_list %}
     {% for item in bucket_list.priv_items %}
-      {{ item.title }}
+      {{ item.public_item.title }}<br>
+      <img src="{{ item.public_item.image }}" alt="Image" width="128" height="128"><br>
     {% endfor %}
   {% endif %}
 </div>
