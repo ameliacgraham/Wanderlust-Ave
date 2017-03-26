@@ -44,15 +44,12 @@ def process_registation_form():
         db.session.commit()
     return redirect("/")
 
-@app.route('/login')
-def show_login():
-    """Displays login form"""
-
-    return render_template("login.html")
-
-@app.route('/login/process', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def process_login_info():
     """Checks if user email and password exist on same account, then logs in or redirects."""
+
+    if request.method== "GET":
+        return render_template("login.html")
 
     username = request.form.get("username")
     password = request.form.get("password")
@@ -98,6 +95,8 @@ def add_bucket_list():
         user_list = BucketList.query.filter(BucketList.username==username,
                                             BucketList.title==title).one()
     except Exception, e:
+        title = request.form.get('title')
+        username = request.form.get('username')
         new_list = BucketList(username=username, title=title)
         db.session.add(new_list)
         db.session.commit()
@@ -107,13 +106,74 @@ def add_bucket_list():
     flash("You already have a list named {}".format(title))
     return redirect('/my-lists/add')
 
+
+# Id of list object
 @app.route('/my-lists/<title>')
 def display_bucket_list(title):
     """Displays a user's bucket list."""
 
-    bucket_list = BucketList.query.filter(BucketList.title==title).one()
+    bucket_list = BucketList.query.filter(BucketList.title==title).first()
+    list_name = title
 
-    return render_template("bucket_list.html", bucket_list=bucket_list)
+    return render_template("bucket_list.html", bucket_list=bucket_list,
+                            list_name=list_name)
+
+@app.route('/add-item-form', methods=['GET', 'POST'])
+def display_add_item_form():
+    """Displays bucket item form."""
+
+    username = session["username"]
+
+    lists = BucketList.query.filter(BucketList.username==username).all()
+
+    return render_template("add-item-form.html", lists=lists)
+
+@app.route('/add-item/process', methods=['POST'])
+def process_add_bucket_item():
+    """Checks if item already exists in a list, if not then adds it."""
+
+    title = request.form.get('title')
+    username = request.form.get('username')
+    tour_link = request.form.get('tour-link')
+    latitude = request.form.get('latitude')
+    longitude = request.form.get('longitude')
+    image = request.form.get('image')
+    description = request.form.get('description')
+    list_title = request.form.get('list')
+
+
+    try:
+        item = PublicItem.query.filter(PublicItem.title==title).one()
+    except Exception, e:
+        bucket_item = PublicItem(title=title,image=image,description=description)
+        db.session.add(bucket_item)
+        db.session.commit()
+        public_id = bucket_item.public_item_id
+        b_list = BucketList.query.filter(BucketList.title==list_title).one()
+        b_list_id = b_list.list_id
+        new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
+                           tour_link=tour_link)
+        db.session.add(new_item)
+        db.session.commit()
+        flash("Your item has been added!")
+        return redirect('/my-lists/<{}>'.format(list_title))
+
+
+    public_id = item.public_item_id
+    b_list = BucketList.query.filter(BucketList.title==list_title).one()
+    b_list_id = b_list.list_id
+    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id).first()
+    if private_item:
+        flash("You already have an item with that title!")
+        return redirect('/my-lists')
+    else:
+        new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
+                               tour_link=tour_link)
+        db.session.add(new_item)
+        db.session.commit()
+        flash("Your item has been added!")
+        return redirect('/my-lists/add')
+
 
 
 
