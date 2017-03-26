@@ -17,6 +17,14 @@ def display_homepage():
 
     return render_template("homepage.html", public_items=public_items)
 
+@app.route('/<public_item_id>')
+def display_public_item_details(public_item_id):
+
+    item_info = PublicItem.query.get(public_item_id)
+
+    return render_template('public-item.html', 
+                           item_info=item_info)
+
 @app.route('/register')
 def show_registration_form():
     """Display registration form."""
@@ -92,7 +100,7 @@ def display_add_list_form():
     return render_template("add-list.html")
 
 
-@app.route('/my-lists/add')
+@app.route('/my-lists/add', methods=['POST'])
 def add_bucket_list():
     """Add new bucket list."""
 
@@ -153,7 +161,8 @@ def process_add_bucket_item():
     try:
         item = PublicItem.query.filter(PublicItem.title==title).one()
     except Exception, e:
-        bucket_item = PublicItem(title=title,image=image,description=description)
+        bucket_item = PublicItem(title=title,image=image,description=description,
+                                  latitude=latitude, longitude=longitude)
         db.session.add(bucket_item)
         db.session.commit()
         public_id = bucket_item.public_item_id
