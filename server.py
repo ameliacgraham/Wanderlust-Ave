@@ -124,15 +124,15 @@ def add_bucket_list():
 
 
 # Id of list object
-@app.route('/my-lists/<title>')
-def display_bucket_list(title):
+@app.route('/my-lists/<list_id>')
+def display_bucket_list(list_id):
     """Displays a user's bucket list."""
 
-    bucket_list = BucketList.query.filter(BucketList.title==title).first()
-    list_name = title
+    bucket_list = BucketList.query.filter(BucketList.list_id==list_id).one()
+    b_list_id = list_id 
 
     return render_template("bucket_list.html", bucket_list=bucket_list,
-                            list_name=list_name)
+                            b_list=b_list_id)
 
 @app.route('/add-item-form', methods=['GET', 'POST'])
 def display_add_item_form():
