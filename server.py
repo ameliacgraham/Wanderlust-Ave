@@ -25,15 +25,26 @@ def display_public_item_details(public_item_id):
     return render_template('public-item.html', 
                            item_info=item_info)
 
-@app.route('/register')
-def show_registration_form():
-    """Display registration form."""
+@app.route('/search')
+def process_search_form():
 
-    return render_template('registration-form.html')
+    form_input = request.args.get('public-search')
+    keywords = form_input.split()
+    matched_items = []
 
-@app.route('/register/complete', methods=['POST'])
+    for word in keywords:
+        items = PublicItem.query.filter(PublicItem.title.like("%{}%".format(word))).all()
+        for item_object in items:
+            matched_items.append(item_object)
+
+    return render_template('search-results.html', matched_items=matched_items)
+
+@app.route('/register', methods=['GET','POST'])
 def process_registation_form():
-    """Process registration form"""
+    """Display and process registration form"""
+
+    if request.method == 'GET':
+        return render_template('registration-form.html')
 
     email = request.form.get('email')
     username = request.form.get('username')
@@ -56,7 +67,7 @@ def process_registation_form():
 def process_login_info():
     """Checks if user email and password exist on same account, then logs in or redirects."""
 
-    if request.method== "GET":
+    if request.method == "GET":
         return render_template("login.html")
 
     username = request.form.get("username")

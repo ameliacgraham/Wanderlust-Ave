@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
 
-Hello, World!
+<h2>ADVENTURE AWAITS</h2>
 
 <p><a href="/register">Register</a></p>
 <p><a href="/login">Login</a></p>
 <p><a href="/logout">Logout</a></p>
 <p><a href="/my-lists">My Lists</a></p>
 
-
+<form action="/search">
+    <input type="search" name="public-search" placeholder="search">
+    <input type="submit" value="Search"><br><br>
+</form>
 
 <div>
   {% if public_items %}
     {% for item in public_items %}
       {{ item.title }} <br>
       <a href="/{{ item.public_item_id }}">
-        <img src="{{ item.image}}" alt="Bucket Item" width="128" height="128"><br> 
+        <img src="{{ item.image }}" alt="Bucket Item" width="128" height="128"><br> 
       </a>
     {% endfor %}
   {% endif %}
