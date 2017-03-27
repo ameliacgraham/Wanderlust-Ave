@@ -8,7 +8,7 @@
     {% for item in lists %}
       <option value="{{ item.title }}">{{ item.title }}</option>
     {% endfor %}
-        </select><br><br>
+  </select><br><br>
   <label>Title</label>
     <input type="text" name="title" placeholder="title" required><br><br>
   <label>Tour Link</label>
@@ -23,5 +23,4 @@
     <input type="hidden" name="username" value={{ session["username"] }}>
     <input type="submit">
 </form>
-
 {% endblock %}

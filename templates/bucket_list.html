@@ -2,9 +2,7 @@
 {% block content %}
 
 <h2> {{ bucket_list.title }} </h2>
-
 <p><a href="/add-item-form">Add a new item</a></p>
-
 <div>
   {% if bucket_list %}
     {% for item in bucket_list.priv_items %}
@@ -15,7 +13,4 @@
     {% endfor %}
   {% endif %}
 </div>
-
-
-
 {% endblock %}

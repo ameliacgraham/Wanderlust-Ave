@@ -4,17 +4,13 @@
   <title>WanderList</title>
   <script src="http:/code.jquery.js"></script>
 </head>
-
 <body>
   Welcome to WanderList
-    <ul>
+  <ul>
     {% for message in get_flashed_messages() %}
-        <li>{{ message }}</li>
+      <li>{{ message }}</li>
     {% endfor %}
-    </ul>
-  <hr>
-  
+  </ul>
   {% block content %} put your content here {% endblock %}
-
 </body>
 </html>

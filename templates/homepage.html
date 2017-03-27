@@ -9,10 +9,9 @@
 <p><a href="/my-lists">My Lists</a></p>
 
 <form action="/search">
-    <input type="search" name="public-search" placeholder="search">
-    <input type="submit" value="Search"><br><br>
+  <input type="search" name="public-search" placeholder="search">
+  <input type="submit" value="Search"><br><br>
 </form>
-
 <div>
   {% if public_items %}
     {% for item in public_items %}
@@ -23,7 +22,4 @@
     {% endfor %}
   {% endif %}
 </div>
-
-
-
 {% endblock %}

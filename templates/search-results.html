@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
 <div>
   {% if matched_items %}
     {% for item in matched_items %}
@@ -10,7 +9,6 @@
       <img src="{{ item.image }}" alt="Bucket Item" width="128" height="128"><br> 
       </a>
     {% endfor %}
-  {% endif %}
-  
+  {% endif %} 
 </div>
 {% endblock %}

@@ -19,6 +19,7 @@ def display_homepage():
 
 @app.route('/<public_item_id>')
 def display_public_item_details(public_item_id):
+    """Displays info about a public item."""
 
     item_info = PublicItem.query.get(public_item_id)
 
@@ -27,6 +28,7 @@ def display_public_item_details(public_item_id):
 
 @app.route('/search')
 def process_search_form():
+    """Processes a search form."""
 
     form_input = request.args.get('public-search')
     keywords = form_input.split()
@@ -184,13 +186,14 @@ def process_add_bucket_item():
         db.session.add(new_item)
         db.session.commit()
         flash("Your item has been added!")
-        return redirect('/my-lists/<{}>'.format(list_title))
+        return redirect('/my-lists/<{}>'.format(list_id))
 
 
     public_id = item.public_item_id
     b_list = BucketList.query.filter(BucketList.title==list_title).one()
     b_list_id = b_list.list_id
     private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id).first()
+
     if private_item:
         flash("You already have an item with that title!")
         return redirect('/my-lists')
@@ -200,7 +203,7 @@ def process_add_bucket_item():
         db.session.add(new_item)
         db.session.commit()
         flash("Your item has been added!")
-        return redirect('/my-lists/add')
+        return redirect('/my-lists/<{}>'.format(b_list_id))
 
 
 
