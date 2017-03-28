@@ -5,6 +5,8 @@
   {% if item_info %}
     {{ item_info.title }} <br>
     <img src="{{ item_info.image }}" alt="Image" width="128" height="128"><br>
+    Latitude: {{ item_info.latitude }}<br>
+    Longitude: {{ item_info.longitude }}
   {% endif %}
 </div>
 {% endblock %}

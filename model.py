@@ -63,7 +63,6 @@ class PublicItem(db.Model):
 
 def example_data():
         """Create example data for the test database."""
-        #FIXME: write a function that creates a game and adds it to the database.
         item1 = PublicItem(title='Visit The Eiffel Tower', 
                 image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg',
                 latitude=48.858093,
@@ -83,13 +82,14 @@ class PrivateItem(db.Model):
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
     date_completed = db.Column(db.DateTime, nullable=True)
+    # Add priority
 
     public_item = db.relationship("PublicItem",
                                     backref=db.backref("priv_items",
                                                order_by=public_item_id))
 
     bucket_list = db.relationship("BucketList",
-                                backref=db.backref("priv_items",
+                                    backref=db.backref("priv_items",
                                            order_by=list_id))
 
     def __repr__(self):

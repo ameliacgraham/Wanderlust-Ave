@@ -3,11 +3,13 @@ from jinja2 import StrictUndefined
 from flask import Flask, jsonify, render_template, redirect, request, flash, session
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal
 from flask_debugtoolbar import DebugToolbarExtension
-from LatLon import LatLon
+import os
 
 app = Flask(__name__)
 app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
+
+gm_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 
 @app.route('/')
 def display_homepage():
@@ -17,13 +19,26 @@ def display_homepage():
 
     return render_template("homepage.html", public_items=public_items)
 
-@app.route('/<public_item_id>')
-def display_public_item_details(public_item_id):
+@app.route('/<pub_item_id>')
+def display_public_item_details(pub_item_id):
     """Displays info about a public item."""
 
-    item_info = PublicItem.query.get(public_item_id)
+
+
+    print "Printing public id: {}".format(pub_item_id)
+    item_info = PublicItem.query.filter(PublicItem.public_item_id==pub_item_id).one()
+    print "Item info: {}".format(item_info)
 
     return render_template('public-item.html', 
+                           item_info=item_info)
+
+@app.route('/<list_id>/<priv_item_id>')
+def display_private_item_details(list_id, priv_item_id):
+    """Displays info about a private item."""
+
+    item_info = PrivateItem.query.filter(PrivateItem.priv_item_id==priv_item_id).one()
+
+    return render_template('private-item.html', 
                            item_info=item_info)
 
 @app.route('/search')
@@ -40,6 +55,12 @@ def process_search_form():
             matched_items.append(item_object)
 
     return render_template('search-results.html', matched_items=matched_items)
+
+@app.route('/map')
+def display_google_map():
+
+    return render_template("public-items-map.html",
+                           gm_api_key=gm_api_key)
 
 @app.route('/register', methods=['GET','POST'])
 def process_registation_form():
@@ -104,6 +125,7 @@ def display_bucket_lists():
     username = session["username"]
     user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
 
+
     return render_template("user-lists.html", user_bucket_lists=user_bucket_lists)
 
 @app.route('/my-lists/add-form')
@@ -136,16 +158,18 @@ def add_bucket_list():
     return redirect('/my-lists/add')
 
 
-# Id of list object
+# Id of list object instead of title
 @app.route('/my-lists/<list_id>')
 def display_bucket_list(list_id):
     """Displays a user's bucket list."""
 
     bucket_list = BucketList.query.filter(BucketList.list_id==list_id).one()
-    b_list_id = list_id 
+    b_list_id = list_id
 
-    return render_template("bucket_list.html", bucket_list=bucket_list,
-                            b_list=b_list_id)
+    return render_template("bucket-list.html", 
+                           bucket_list=bucket_list,
+                           b_list=b_list_id,
+                           gm_api_key=gm_api_key)
 
 @app.route('/add-item-form', methods=['GET', 'POST'])
 def display_add_item_form():
@@ -164,11 +188,13 @@ def process_add_bucket_item():
     title = request.form.get('title')
     username = request.form.get('username')
     tour_link = request.form.get('tour-link')
-    latitude = request.form.get('latitude')
-    longitude = request.form.get('longitude')
     image = request.form.get('image')
     description = request.form.get('description')
     list_title = request.form.get('list')
+    latitude = request.form.get('latitude')
+    longitude = request.form.get('longitude')
+    print latitude
+    print longitude
 
 
     try:
@@ -186,7 +212,7 @@ def process_add_bucket_item():
         db.session.add(new_item)
         db.session.commit()
         flash("Your item has been added!")
-        return redirect('/my-lists/<{}>'.format(list_id))
+        return redirect('/my-lists/<{}>'.format(b_list_id))
 
 
     public_id = item.public_item_id

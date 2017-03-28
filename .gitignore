@@ -2,3 +2,4 @@ env
 model.pyc
 server.pyc
 .DS_Store
+secrets.sh

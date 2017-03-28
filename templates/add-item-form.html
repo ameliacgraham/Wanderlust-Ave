@@ -3,6 +3,52 @@
 
 <h1>Create New Bucket Item</h1>
 
+<style>
+#pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+}
+</style>
+Location:
+<input id="pac-input" class="controls" type="text" placeholder="Search Box" value="">
+  <script>
+    function initAutocomplete() {
+
+      // Create the search box and link it to the UI element.
+      var input = document.getElementById('pac-input');
+      var searchBox = new google.maps.places.SearchBox(input);
+      
+      // Listen for the event fired when the user selects a prediction and retrieve
+      // more details for that place.
+      searchBox.addListener('places_changed', function() {
+        var places = searchBox.getPlaces();
+          console.log(places);
+
+        if (places.length == 0) {
+          return;
+        }
+
+        // For each place, get the icon, name and location.
+        places.forEach(function(place) {
+          var latitude = place.geometry.location.lat();
+          var longitude = place.geometry.location.lng();
+          document.getElementById('lat').value = latitude;
+          document.getElementById('lon').value = longitude;
+          console.log(document.getElementById('lat'));
+          console.log(document.getElementById('lon'));
+        });
+      });
+    }
+
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initAutocomplete" async defer></script>
+<br><br>
 <form action="/add-item/process" method="POST">
   List: <select name="list">
     {% for item in lists %}
@@ -13,14 +59,13 @@
     <input type="text" name="title" placeholder="title" required><br><br>
   <label>Tour Link</label>
     <input type="url" name="tour-link"><br><br>
-  <label>Location</label>&nbsp;&nbsp;
-    Latitude: <input type="text" name="latitude">
-    Longitude: <input type="text" name="longitude"><br><br>
   <label>Image</label>
     <input type="url" name="image" required><br><br>
   <label>Description</label>
     <input type="text" name="description"><br><br>
     <input type="hidden" name="username" value={{ session["username"] }}>
+    <input id="lat" type="hidden" name="latitude" value="">
+    <input id="lon" type="hidden" name="longitude" value="">
     <input type="submit">
 </form>
 {% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+  {% if item_info %}
+    {{ item_info.public_item.title }} <br>
+    <img src="{{ item_info.public_item.image }}" alt="Image" width="128" height="128"><br>
+    Latitude: {{ item_info.public_item.latitude }}
+    Longitude: {{ item_info.public_item.longitude }}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2> {{ bucket_list.title }} </h2>
+<p><a href="/add-item-form">Add a new item</a></p>
+<div>
+  {% if bucket_list %}
+    {% for item in bucket_list.priv_items %}
+      {{ item.public_item.title }}<br>
+        <a href="/{{ item.list_id }}/{{ item.priv_item_id }}">
+        <img src="{{ item.public_item.image}}" alt="Bucket Item" width="128" height="128"><br>
+        </a>
+    {% endfor %}
+  {% endif %}
+</div>
+
+  <title>Wander Map</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <h2>Wander Map</h2>
+  <div id="map"></div>
+  <script>
+    var map;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 47.36667, lng: 8.55},
+        zoom: 5
+      });
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initMap"
+      async defer>
+  </script>
+
+
+
+{% endblock %}
