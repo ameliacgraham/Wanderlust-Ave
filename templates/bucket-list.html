@@ -13,7 +13,6 @@
     {% endfor %}
   {% endif %}
 </div>
-
   <title>Wander Map</title>
   <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
@@ -32,18 +31,56 @@
   </style>
   <h2>Wander Map</h2>
   <div id="map"></div>
+
+{{ places }}
+
   <script>
     var map;
+    var mapDiv = document.getElementById('map');
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 47.36667, lng: 8.55},
         zoom: 5
       });
+    // Added new code for testing
+    // var exampleList = [['See the Eiffel Tower', 47.36667, 8.55]]
+    var myLocations = {{ places | safe }};
+    console.log(myLocations);
+    function setMarkers(map) {
+      for (var i = 0; i < myLocations.length; i++) {
+        var place = myLocations[i];
+        console.log(place);
+        var marker = new google.maps.Marker({
+          position: {lat: place[1], lng: place[2]},
+          map: map,
+          title: place[0]
+        });
+        marker.setMap(map);;
+      }
     }
-  </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initMap"
-      async defer>
-  </script>
+    setMarkers(map)
+    }
+    // var myLocations = {{ places }};
+    // console.log(myLocations);
+    // var exampleList = [['See the Eiffel Tower', 47.36667, 8.55]]
+    // function setMarkers(map) {
+    //   for (var i = 0; i < exampleList.length; i++) {
+    //     var place = exampleList[i];
+    //     console.log(place);
+    //     var marker = new google.maps.Marker({
+    //       position: {lat: place[1], lng: place[2]},
+    //       map: map,
+    //       title: place[0]
+    //     });
+    //     marker.setMap(map);;
+    //   }
+    // }
+    // google.maps.event.addDomListener(mapDiv, 'click', setMarkers(map));
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initMap"
+       async defer>
+</script>
 
 
 

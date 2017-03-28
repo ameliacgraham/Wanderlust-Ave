@@ -4,6 +4,7 @@ from flask import Flask, jsonify, render_template, redirect, request, flash, ses
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal
 from flask_debugtoolbar import DebugToolbarExtension
 import os
+import json
 
 app = Flask(__name__)
 app.secret_key = "ABC"
@@ -166,10 +167,22 @@ def display_bucket_list(list_id):
     bucket_list = BucketList.query.filter(BucketList.list_id==list_id).one()
     b_list_id = list_id
 
+    places = []
+
+    for item in bucket_list.priv_items:
+        item_coordinates = [item.public_item.title, item.public_item.latitude,
+                            item.public_item.longitude]
+        places.append(item_coordinates)
+    
+    # change back to UTF-8
+    for location in places:
+        location[0] = str(location[0])
+
     return render_template("bucket-list.html", 
                            bucket_list=bucket_list,
                            b_list=b_list_id,
-                           gm_api_key=gm_api_key)
+                           gm_api_key=gm_api_key,
+                           places=places)
 
 @app.route('/add-item-form', methods=['GET', 'POST'])
 def display_add_item_form():
