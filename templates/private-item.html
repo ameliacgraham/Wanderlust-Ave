@@ -6,13 +6,21 @@
     {{ item_info.public_item.title }} <br>
     <img src="{{ item_info.public_item.image }}" alt="Image" width="128" height="128"><br>
     Latitude: {{ item_info.public_item.latitude }}
-    Longitude: {{ item_info.public_item.longitude }}
+    Longitude: {{ item_info.public_item.longitude }} <br>
+    Checked Off: {{ item_info.checked_off }}
 
     <form id="del-item" action="/delete-item" method='POST'>
       <input type="checkbox" name="delete-item" value="delete">
       <input type="hidden" name="item-id" value={{ item_info.priv_item_id }}>
       <input id="del-button" type="submit" name="submit" value="DELETE">
     </form>
+    <form action="/check-off-item" method="POST">
+      <input type="checkbox" name="check-off" value="Check Off">
+      <input type="hidden" name="item-id" value={{ item_info.priv_item_id }}>
+      <input type="hidden" name="list-id" value={{ item_info.list_id }}>
+      <input type="submit" name="checked-submit" value="Check Off">
+    </form>
+
   {% endif %}
 
 <script src="https://code.jquery.com/jquery.js"></script>

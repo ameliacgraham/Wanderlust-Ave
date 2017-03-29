@@ -35,7 +35,6 @@ def display_private_item_details(list_id, priv_item_id):
     """Displays info about a private item."""
 
     item_info = PrivateItem.query.filter(PrivateItem.priv_item_id==priv_item_id).one()
-
     return render_template('private-item.html', 
                            item_info=item_info)
 
@@ -142,8 +141,8 @@ def display_bucket_lists():
     username = session["username"]
     user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
 
-
-    return render_template("user-lists.html", user_bucket_lists=user_bucket_lists)
+    return render_template("user-lists.html", 
+                            user_bucket_lists=user_bucket_lists)
 
 @app.route('/my-lists/add-form')
 def display_add_list_form():
@@ -176,7 +175,7 @@ def add_bucket_list():
 
 @app.route('/delete-item', methods=['POST'])
 def delete_priv_item():
-    """Deletes and item from a user's bucket list."""
+    """Deletes an item from a user's bucket list."""
 
     del_item = request.form.get('delete-item')
     item_id = request.form.get('item-id')
@@ -209,11 +208,16 @@ def display_bucket_list(list_id):
     for location in places:
         location[0] = str(location[0])
 
+    all_list_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id).count()
+    checked_off_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id, PrivateItem.checked_off==True).count()
+    progress = str(checked_off_items) + "/" + str(all_list_items)
+
     return render_template("bucket-list.html", 
                            bucket_list=bucket_list,
                            b_list=b_list_id,
                            gm_api_key=gm_api_key,
-                           places=places)
+                           places=places,
+                           progress=progress)
 
 @app.route('/add-item-form', methods=['GET', 'POST'])
 def display_add_item_form():
@@ -285,6 +289,19 @@ def process_add_bucket_item():
         db.session.commit()
         flash("Your item has been added!")
         return redirect('/my-lists/{}'.format(b_list_id))
+
+@app.route('/check-off-item', methods=['POST'])
+def check_off_item():
+    """Changes the status of the item as completed."""
+
+    item_id = request.form.get("item-id")
+    list_id = request.form.get("list-id")
+
+    item = PrivateItem.query.filter(PrivateItem.priv_item_id==item_id).one()
+    item.checked_off = True
+    db.session.commit()
+
+    return redirect('/{}/{}'.format(list_id,item_id))
 
 
 
