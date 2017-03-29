@@ -1,37 +1,51 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Wander Map</title>
-    <meta name="viewport" content="initial-scale=1.0">
-    <meta charset="utf-8">
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 100%;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>Wander Map</h2>
-    <div id="map"></div>
-    <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 47.36667, lng: 8.55},
-          zoom: 5
+{% extends 'base.html' %}
+{% block content %}
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <h2>Wander Map</h2>
+  <div id="map"></div>
+
+{{ places }}
+
+  <script>
+    var map;
+    var mapDiv = document.getElementById('map');
+    function initMap() {
+      // Initalize a new map object
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 47.36667, lng: 8.55},
+        zoom: 5
+      });
+// Safe stops jinja from converting quotes to '&#39;
+    var myLocations = {{ places | safe }};
+    function setMarkers(map) {
+      for (var i = 0; i < myLocations.length; i++) {
+        var place = myLocations[i];
+        var marker = new google.maps.Marker({
+          position: {lat: place[1], lng: place[2]},
+          map: map,
+          title: place[0]
         });
+        marker.setMap(map);;
       }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initMap"
-        async defer>
-    </script>
-  </body>
-</html>
+    }
+    setMarkers(map)
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initMap"
+       async defer>
+</script>
+{% endblock %}

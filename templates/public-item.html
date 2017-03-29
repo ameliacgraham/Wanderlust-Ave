@@ -8,5 +8,11 @@
     Latitude: {{ item_info.latitude }}<br>
     Longitude: {{ item_info.longitude }}
   {% endif %}
+
+  {% if username %}
+    <form action='/add-item-form'>
+    <input type="submit" name="Add">
+    </form>
+  {% endif %}
 </div>
 {% endblock %}

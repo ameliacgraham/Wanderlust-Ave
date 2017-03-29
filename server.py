@@ -20,18 +20,15 @@ def display_homepage():
 
     return render_template("homepage.html", public_items=public_items)
 
-@app.route('/<pub_item_id>')
+@app.route('/public/<pub_item_id>')
 def display_public_item_details(pub_item_id):
     """Displays info about a public item."""
 
-
-
-    print "Printing public id: {}".format(pub_item_id)
+    username = session["username"]
     item_info = PublicItem.query.filter(PublicItem.public_item_id==pub_item_id).one()
-    print "Item info: {}".format(item_info)
-
     return render_template('public-item.html', 
-                           item_info=item_info)
+                           item_info=item_info,
+                           username=username)
 
 @app.route('/<list_id>/<priv_item_id>')
 def display_private_item_details(list_id, priv_item_id):
@@ -59,6 +56,25 @@ def process_search_form():
 
 @app.route('/map')
 def display_google_map():
+
+    items = PublicItem.query.all()
+
+    places = []
+
+    for item in items:
+        item_coordinates = [item.title, item.latitude,
+                            item.longitude]
+        places.append(item_coordinates)
+    
+    # change back to UTF-8
+    for location in places:
+        location[0] = str(location[0])
+
+    return render_template("public-items-map.html",
+                           gm_api_key=gm_api_key,
+                           places=places)
+
+
 
     return render_template("public-items-map.html",
                            gm_api_key=gm_api_key)
@@ -158,6 +174,21 @@ def add_bucket_list():
     flash("You already have a list named {}".format(title))
     return redirect('/my-lists/add')
 
+@app.route('/delete-item', methods=['POST'])
+def delete_priv_item():
+    """Deletes and item from a user's bucket list."""
+
+    del_item = request.form.get('delete-item')
+    item_id = request.form.get('item-id')
+    print del_item
+
+    if del_item == 'delete':
+        item = PrivateItem.query.filter(PrivateItem.priv_item_id==item_id).one()
+        db.session.delete(item)
+        db.session.commit()
+
+    return redirect('/')
+
 
 # Id of list object instead of title
 @app.route('/my-lists/<list_id>')
@@ -192,7 +223,9 @@ def display_add_item_form():
 
     lists = BucketList.query.filter(BucketList.username==username).all()
 
-    return render_template("add-item-form.html", lists=lists)
+    return render_template("add-item-form.html",
+                           lists=lists,
+                           gm_api_key=gm_api_key)
 
 @app.route('/add-item/process', methods=['POST'])
 def process_add_bucket_item():
@@ -209,10 +242,36 @@ def process_add_bucket_item():
     print latitude
     print longitude
 
+    # Query for the public item with the title as the input title
+    item = PublicItem.query.filter(PublicItem.title.ilike(title.lower())).first()
+    user = User.query.filter(User.username==username).one()
 
-    try:
-        item = PublicItem.query.filter(PublicItem.title==title).one()
-    except Exception, e:
+    # if there is a public item with that title
+    if item:
+
+            # If the title of the object is the same, create a private item with that
+            # public id.
+        if item.title.lower() == title.lower():
+            public_id = item.public_item_id
+            b_list = BucketList.query.filter(BucketList.title==list_title).one()
+            b_list_id = b_list.list_id
+            # Check if a private item for that userexists with that title
+            private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
+                                                    user.username==username).all()
+
+            # If there is a private item with that title
+            if private_item:
+                flash("You already have an item with that title!")
+                return redirect('/my-lists')
+            else:
+                new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
+                                       tour_link=tour_link)
+                db.session.add(new_item)
+                db.session.commit()
+                flash("Your item has been added!")
+                return redirect('/my-lists/{}'.format(b_list_id))
+        
+    else:
         bucket_item = PublicItem(title=title,image=image,description=description,
                                   latitude=latitude, longitude=longitude)
         db.session.add(bucket_item)
@@ -225,25 +284,7 @@ def process_add_bucket_item():
         db.session.add(new_item)
         db.session.commit()
         flash("Your item has been added!")
-        return redirect('/my-lists/<{}>'.format(b_list_id))
-
-
-    public_id = item.public_item_id
-    b_list = BucketList.query.filter(BucketList.title==list_title).one()
-    b_list_id = b_list.list_id
-    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id).first()
-
-    if private_item:
-        flash("You already have an item with that title!")
-        return redirect('/my-lists')
-    else:
-        new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
-                               tour_link=tour_link)
-        db.session.add(new_item)
-        db.session.commit()
-        flash("Your item has been added!")
-        return redirect('/my-lists/<{}>'.format(b_list_id))
-
+        return redirect('/my-lists/{}'.format(b_list_id))
 
 
 
