@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from datetime import datetime
 db = SQLAlchemy()
 
@@ -20,6 +21,20 @@ class User(db.Model):
 
         return "<User username: {}, name: {}{}>".format(self.username, self.first_name,
                                                         self.last_name)
+
+    def get_progress(self):
+        """Gets a user's progress for all items."""
+
+        total_items = (db.session.query((BucketList.username))
+                                 .join(PrivateItem)
+                                 .filter(BucketList.username==self.username).count())
+
+        checked_items = (db.session.query((BucketList.username))
+                                 .join(PrivateItem)
+                                 .filter(BucketList.username==self.username, 
+                                         PrivateItem.checked_off==True).count())
+        progress = {"total_items": total_items, "checked_items":checked_items}
+        return progress
 
 
 class BucketList(db.Model):

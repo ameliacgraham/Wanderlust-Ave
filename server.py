@@ -141,8 +141,16 @@ def display_bucket_lists():
     username = session["username"]
     user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
 
+    user = User.query.get(username)
+    progress_results = user.get_progress()
+
+    items = progress_results['total_items']
+    checked_off_items = progress_results['checked_items']
+
     return render_template("user-lists.html", 
-                            user_bucket_lists=user_bucket_lists)
+                            user_bucket_lists=user_bucket_lists,
+                            items=items,
+                            checked_off_items=checked_off_items)
 
 @app.route('/my-lists/add-form')
 def display_add_list_form():

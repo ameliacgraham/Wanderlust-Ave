@@ -3,6 +3,8 @@
 
 <p><a href="/my-lists/add-form">Create a new list</a></p>
 
+Progress: {{ checked_off_items }} / {{ items }}<br><br>
+ 
 <div>
   {% if user_bucket_lists %}
     {% for list in user_bucket_lists %}
