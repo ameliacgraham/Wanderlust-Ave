@@ -12,7 +12,7 @@
     <form id="del-item" action="/delete-item" method='POST'>
       <input type="checkbox" name="delete-item" value="delete">
       <input type="hidden" name="item-id" value={{ item_info.priv_item_id }}>
-      <input id="del-button" type="submit" name="submit" value="DELETE">
+      <input id="del-button" type="submit" name="del-submit" value="DELETE">
     </form>
     <form action="/check-off-item" method="POST">
       <input type="checkbox" name="check-off" value="Check Off">
@@ -28,16 +28,16 @@
 <script>
   "use strict";
 
-var deleteButton = document.getElementById('del-button')
+var deleteButton = document.getElementById('del-button');
+var deleteForm = document.getElementById('del-item');
 
 function alertDelete(evt) {
   evt.preventDefault();
-  var deleteForm = document.getElementById('del-item')
   var response = confirm("Are you sure you want to delete your item?");
   if (response == true) {
     // Continue to /delete-add
     // window.location.replace("http://localhost:5000/delete-item");
-    deleteForm.trigger('submit');
+    deleteForm.submit();
   } else {
     // Return back to page
     window.location.replace("http://localhost:5000");
