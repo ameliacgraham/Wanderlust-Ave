@@ -15,6 +15,11 @@ class BucketTests(unittest.TestCase):
         result = self.client.get("/")
         self.assertIn("Login", result.data)
 
+    def test_mylists(self):
+        result = self.client.get("/my-lists")
+        self.assertIn("Create a new list", result.data)
+
+
 
     """Flask tests that use the database."""
 
