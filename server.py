@@ -17,14 +17,15 @@ def display_homepage():
     """Homepage"""
 
     public_items = PublicItem.query.all()
-
-    return render_template("homepage.html", public_items=public_items)
+    username = session.get("username")
+    return render_template("homepage.html", public_items=public_items,
+                           username=username)
 
 @app.route('/public/<pub_item_id>')
 def display_public_item_details(pub_item_id):
     """Displays info about a public item."""
 
-    username = session["username"]
+    username = session.get("username")
     item_info = PublicItem.query.filter(PublicItem.public_item_id==pub_item_id).one()
     return render_template('public-item.html', 
                            item_info=item_info,
@@ -55,9 +56,9 @@ def process_search_form():
 
 @app.route('/map')
 def display_google_map():
+    """Display markers on a map for all public items"""
 
     items = PublicItem.query.all()
-
     places = []
 
     for item in items:
@@ -72,11 +73,6 @@ def display_google_map():
     return render_template("public-items-map.html",
                            gm_api_key=gm_api_key,
                            places=places)
-
-
-
-    return render_template("public-items-map.html",
-                           gm_api_key=gm_api_key)
 
 @app.route('/register', methods=['GET','POST'])
 def process_registation_form():
@@ -138,19 +134,23 @@ def log_user_out():
 def display_bucket_lists():
     """Display users bucket lists."""
 
-    username = session["username"]
+    username = session.get("username")
     user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
 
-    user = User.query.get(username)
-    progress_results = user.get_progress()
+    if username:
+        user = User.query.get(username)
+        progress_results = user.get_progress()
 
-    items = progress_results['total_items']
-    checked_off_items = progress_results['checked_items']
+        items = progress_results['total_items']
+        checked_off_items = progress_results['checked_items']
 
-    return render_template("user-lists.html", 
+        return render_template("user-lists.html", 
                             user_bucket_lists=user_bucket_lists,
                             items=items,
                             checked_off_items=checked_off_items)
+    else:
+        flash("You are not signed in")
+        return redirect('/login')
 
 @app.route('/my-lists/add-form')
 def display_add_list_form():
@@ -263,7 +263,6 @@ def process_add_bucket_item():
 
         # If the title of the object is the same, create a private item with that
         # public id.
-
         public_id = item.public_item_id
         b_list = BucketList.query.filter(BucketList.title==list_title).one()
         b_list_id = b_list.list_id
@@ -277,13 +276,7 @@ def process_add_bucket_item():
             return redirect('/my-lists')
         else:
             create_private_item(public_id, b_list_id, tour_link)
-            # new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
-            #                        tour_link=tour_link)
-            # db.session.add(new_item)
-            # db.session.commit()
-            # flash("Your item has been added!")
-            # return redirect('/my-lists/{}'.format(b_list_id))
-        
+    # If there is not a public item with that title, create a public and private item    
     else:
         bucket_item = PublicItem(title=title,image=image,description=description,
                                   latitude=latitude, longitude=longitude)

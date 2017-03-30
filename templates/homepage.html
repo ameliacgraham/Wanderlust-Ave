@@ -3,10 +3,14 @@
 
 <h2>ADVENTURE AWAITS</h2>
 
+{% if username %}
+  <p>Hi {{ username }}!</p>
+  <p><a href="/logout">Logout</a></p>
+  <p><a href="/my-lists">My Lists</a></p>
+{% endif %}
+
 <p><a href="/register">Register</a></p>
 <p><a href="/login">Login</a></p>
-<p><a href="/logout">Logout</a></p>
-<p><a href="/my-lists">My Lists</a></p>
 <p><a href="/map">Map</a></p>
 
 <form action="/search">
