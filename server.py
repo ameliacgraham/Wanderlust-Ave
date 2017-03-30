@@ -125,10 +125,10 @@ def process_login_info():
 def log_user_out():
     """Logs a user out."""
 
-    session = {}
+    del session['username']
+    public_items = PublicItem.query.all()
     flash("You have successfully logged out!")
     return redirect("/")
-
 
 @app.route('/my-lists')
 def display_bucket_lists():
