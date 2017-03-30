@@ -78,11 +78,21 @@ class PublicItem(db.Model):
 
 def example_data():
         """Create example data for the test database."""
-        item1 = PublicItem(title='Visit The Eiffel Tower', 
+        item1 = PublicItem(title='See The Eiffel Tower', 
                 image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg',
                 latitude=48.858093,
                 longitude=2.294694)
         db.session.add(item1)
+        user = User(first_name="Hackbright",
+                    last_name="Academy",
+                    username="balloonicorn",
+                    password="party",
+                    email="balloonicorn@gmail.com")
+        db.session.add(user)
+        bucket_list = BucketList(list_id=1, 
+                                 title="My Bucket List",
+                                 username="balloonicorn")
+        db.session.add(bucket_list)
         db.session.commit()
 
 class PrivateItem(db.Model):
@@ -97,7 +107,7 @@ class PrivateItem(db.Model):
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
     date_completed = db.Column(db.DateTime, nullable=True)
-    # Add priority
+    priority = db.Column(db.String(6), nullable=True)
 
     public_item = db.relationship("PublicItem",
                                     backref=db.backref("priv_items",
@@ -134,11 +144,11 @@ class Journal(db.Model):
                                                                   self.title)  
 
 
-def connect_to_db(app):
+def connect_to_db(app, db_uri="postgresql:///wander_list"):
     """Connect the database to our Flask app."""
 
     # Configure to use our PstgreSQL database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///wander_list'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
