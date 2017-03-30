@@ -255,33 +255,34 @@ def process_add_bucket_item():
     print longitude
 
     # Query for the public item with the title as the input title
-    item = PublicItem.query.filter(PublicItem.title.ilike(title.lower())).first()
+    item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
     user = User.query.filter(User.username==username).one()
 
     # if there is a public item with that title
     if item:
 
-            # If the title of the object is the same, create a private item with that
-            # public id.
-        if item.title.lower() == title.lower():
-            public_id = item.public_item_id
-            b_list = BucketList.query.filter(BucketList.title==list_title).one()
-            b_list_id = b_list.list_id
-            # Check if a private item for that userexists with that title
-            private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
-                                                    user.username==username).all()
+        # If the title of the object is the same, create a private item with that
+        # public id.
 
-            # If there is a private item with that title
-            if private_item:
-                flash("You already have an item with that title!")
-                return redirect('/my-lists')
-            else:
-                new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
-                                       tour_link=tour_link)
-                db.session.add(new_item)
-                db.session.commit()
-                flash("Your item has been added!")
-                return redirect('/my-lists/{}'.format(b_list_id))
+        public_id = item.public_item_id
+        b_list = BucketList.query.filter(BucketList.title==list_title).one()
+        b_list_id = b_list.list_id
+        # Check if a private item for that userexists with that title
+        private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
+                                                user.username==username).all()
+
+        # If there is a private item with that title
+        if private_item:
+            flash("You already have an item with that title!")
+            return redirect('/my-lists')
+        else:
+            create_private_item(public_id, b_list_id, tour_link)
+            # new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
+            #                        tour_link=tour_link)
+            # db.session.add(new_item)
+            # db.session.commit()
+            # flash("Your item has been added!")
+            # return redirect('/my-lists/{}'.format(b_list_id))
         
     else:
         bucket_item = PublicItem(title=title,image=image,description=description,
@@ -291,12 +292,17 @@ def process_add_bucket_item():
         public_id = bucket_item.public_item_id
         b_list = BucketList.query.filter(BucketList.title==list_title).one()
         b_list_id = b_list.list_id
-        new_item = PrivateItem(public_item_id=public_id,list_id=b_list_id,
+        return create_private_item(public_id, b_list_id, tour_link)
+
+
+def create_private_item(public_id, list_id, tour_link):
+    new_item = PrivateItem(public_item_id=public_id,list_id=list_id,
                            tour_link=tour_link)
-        db.session.add(new_item)
-        db.session.commit()
-        flash("Your item has been added!")
-        return redirect('/my-lists/{}'.format(b_list_id))
+    db.session.add(new_item)
+    db.session.commit()
+    flash("Your item has been added!")
+    return redirect('/my-lists/{}'.format(list_id))
+
 
 @app.route('/check-off-item', methods=['POST'])
 def check_off_item():
