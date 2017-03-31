@@ -3,7 +3,9 @@ from jinja2 import StrictUndefined
 from flask import Flask, jsonify, render_template, redirect, request, flash, session
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal
 from flask_debugtoolbar import DebugToolbarExtension
+from datetime import datetime
 import os
+import requests
 import json
 
 app = Flask(__name__)
@@ -11,6 +13,7 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 gm_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+travel_payouts_api = os.environ['TRAVEL_PAYOUTS_API']
 
 @app.route('/')
 def display_homepage():
@@ -73,6 +76,60 @@ def display_google_map():
     return render_template("public-items-map.html",
                            gm_api_key=gm_api_key,
                            places=places)
+
+@app.route('/flight-search')
+def display_flight_form():
+
+    return render_template("flight-search.html")
+
+@app.route('/flight-results')
+def display_flight_results():
+
+    origin = request.args.get('origin')
+    destination = request.args.get('destination')
+    depart_date = request.args.get('depart-at')
+    return_date = request.args.get('return-at')
+    time = datetime.now()
+    year = time.year
+
+    url = ("http://api.travelpayouts.com/v1/prices/cheap?origin={}"
+                "&depart_date={}-{}&currency=USD&token={}").format(origin,
+                                                                   year,
+                                                                   depart_date,
+                                                                   travel_payouts_api)
+    if destination:
+        url += "&destination={}".format(destination)
+
+    elif destination and return_date:
+        url += "&destination={}&return_date={}-{}".format(destination, year, return_date)
+
+    elif return_date:
+        url += "&return_date={}-{}".format(year, return_date)
+
+    r = requests.get(url)
+    data = r.text
+    flight_results = json.loads(data)
+
+    flights = []
+    for airport in flight_results['data']:
+        number = str(flight_results['data'][airport].keys()[0])
+        price = str(flight_results['data'][airport][number]['price'])
+        return_at = str(flight_results['data'][airport][number]['return_at'])
+        # TODO: Clean up variable names
+        return_at = return_at.replace("T", " ").replace("Z", "")
+        return_at = datetime.strptime(return_at, "%Y-%m-%d %H:%M:%S")
+        return_at = return_at.strftime("%A, %B %d, %Y, %I:%M %p")
+        departure_at = str(flight_results['data'][airport][number]['departure_at'])
+        departure_at = departure_at.replace("T", " ").replace("Z", "")
+        departure_at = datetime.strptime(departure_at, "%Y-%m-%d %H:%M:%S")
+        departure_at = departure_at.strftime("%A, %B %d, %Y, %I:%M %p")
+        airline = str(flight_results['data'][airport][number]['airline'])
+        flight_number = str(flight_results['data'][airport][number]['flight_number'])
+
+        flights.append([airport, price, return_at, departure_at, airline, flight_number])
+
+    return render_template('flight-results.html', flights=flights)
+
 
 @app.route('/register', methods=['GET','POST'])
 def process_registation_form():

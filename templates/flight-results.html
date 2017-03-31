@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+  {% for flight in flights %}
+      Airport: {{ flight[0] }}<br>
+      Airline: {{ flight[4] }}<br>
+      Flight number: {{ flight[5] }}<br>
+      Price: {{ flight[1] }}<br>
+      Return At: {{ flight[2] }}<br>
+      Depart At: {{ flight[3] }}<br><br><br><br>
+  {% endfor %}
+</div>
+{% endblock %}

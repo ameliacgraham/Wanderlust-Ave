@@ -28,14 +28,14 @@ class BucketTests(TestCase):
         result = self.client.get("/my-lists/1")
         self.assertIn("Add a new item", result.data)
 
-    # def test_registration(self):
-    #     result = self.client.post("/register", data={"first-name": "Auden",
-    #                                                  "last-name": "Ezra",
-    #                                                  "username": "cats",
-    #                                                  "password": "purr",
-    #                                                  "email": "auden@gmail.com"},
-    #                                             follow_redirects=True)
-    #     self.assertIn("Hi cats!", result.data)
+    def test_registration(self):
+        result = self.client.post("/register", data={"first-name": "Auden",
+                                                     "last-name": "Ezra",
+                                                     "username": "cats",
+                                                     "password": "purr",
+                                                     "email": "auden@gmail.com"},
+                                                follow_redirects=True)
+        self.assertIn("Hi cats!", result.data)
 
     def test_duplicate_registration(self):
         result = self.client.post("/register", data={"first-name": "Hackbright",
