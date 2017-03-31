@@ -97,20 +97,19 @@ def display_flight_results():
                                                                    year,
                                                                    depart_date,
                                                                    travel_payouts_api)
-    if destination:
+    if destination != "-":
         url += "&destination={}".format(destination)
 
-    elif destination and return_date:
-        url += "&destination={}&return_date={}-{}".format(destination, year, return_date)
-
-    elif return_date:
+    if return_date != "":
         url += "&return_date={}-{}".format(year, return_date)
 
+    print url
     r = requests.get(url)
     data = r.text
     flight_results = json.loads(data)
 
     flights = []
+
     for airport in flight_results['data']:
         number = str(flight_results['data'][airport].keys()[0])
         price = str(flight_results['data'][airport][number]['price'])
