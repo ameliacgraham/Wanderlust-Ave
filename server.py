@@ -30,10 +30,15 @@ def display_public_item_details(pub_item_id):
     """Displays info about a public item."""
 
     email = session.get("email")
+    username = session.get("username")
+    lists = BucketList.query.filter(BucketList.email==email).all()
     item_info = PublicItem.query.filter(PublicItem.id==pub_item_id).one()
     return render_template('public-item.html', 
                            item_info=item_info,
-                           email=email)
+                           lists=lists,
+                           email=email,
+                           username=username,
+                           public_item_id=pub_item_id)
 
 @app.route('/<list_id>/<priv_item_id>')
 def display_private_item_details(list_id, priv_item_id):
@@ -183,6 +188,7 @@ def process_login_info():
 def log_user_out():
     """Logs a user out."""
 
+    del session['username']
     del session['email']
     del session['token']
     public_items = PublicItem.query.all()
@@ -243,22 +249,25 @@ def login_user():
     if new == "true":
         print "Got to new user"
         email = request.form.get('email')
-        password = request.form.get('password')
+        password = request.form.get('id')
+        print password
         username = request.form.get('username')
         name = request.form.get('name')
         first_name, last_name = name.split()
         user = User(email=email, password=password, first_name=first_name,
-                    last_name=last_name, username=username)
+                    last_name=last_name, username=username, facebook_id=password)
         db.session.add(user)
         db.session.commit()
     # If user exists
     else:
         email = request.form.get('email')
+        username = request.form.get('username')
         user = User.query.filter(User.email==email).first()
         print "Find user"
 
+    session["username"] = username
     session["email"] = email
-    return "logged in"
+    return redirect('/')
 
 @app.route('/my-lists')
 def display_bucket_lists():
@@ -331,11 +340,13 @@ def delete_priv_item():
 def display_bucket_list(list_id):
     """Displays a user's bucket list."""
 
-    bucket_list = BucketList.query.filter(BucketList.id==list_id).one()
+    bucket_list = BucketList.query.filter(BucketList.id==list_id).first()
     b_list_id = list_id
 
     places = []
 
+    print bucket_list
+    print bucket_list.priv_items
     for item in bucket_list.priv_items:
         item_coordinates = [item.public_item.title, item.public_item.latitude,
                             item.public_item.longitude]
@@ -363,17 +374,24 @@ def display_add_item_form():
     email = session["email"]
 
     lists = BucketList.query.filter(BucketList.email==email).all()
-
+    print(email, lists)
     return render_template("add-item-form.html",
                            lists=lists,
                            gm_api_key=gm_api_key)
+    
+
+@app.route('/add-item/public', methods=['POST'])
+def add_item_from_public():
+    create_private_item()
+    return redirect()
+
+
 
 @app.route('/add-item/process', methods=['POST'])
 def process_add_bucket_item():
     """Checks if item already exists in a list, if not then adds it."""
 
     title = request.form.get('title')
-    email = request.form.get('email')
     tour_link = request.form.get('tour-link')
     image = request.form.get('image')
     description = request.form.get('description')
@@ -387,43 +405,37 @@ def process_add_bucket_item():
     item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
     user = User.query.filter(User.email==email).one()
 
-    # if there is a public item with that title
-    if item:
-
-        # If the title of the object is the same, create a private item with that
-        # public id.
-        public_id = item.public_item_id
-        b_list = BucketList.query.filter(BucketList.title==list_title).first()
-        b_list_id = b_list.list_id
-        # Check if a private item for that userexists with that title
-        private_item = PrivateItem.query.filter(PrivateItem.id==public_id, 
-                                                user.email==email).all()
-
-        # If there is a private item with that title
-        if private_item:
-            flash("You already have an item with that title!")
-            return redirect('/my-lists')
-        else:
-            return create_private_item(public_id, b_list_id, tour_link)
     # If there is not a public item with that title, create a public and private item    
-    else:
-        bucket_item = PublicItem(title=title,image=image,description=description,
+    if not item:
+        item = PublicItem(title=title,image=image,description=description,
                                   latitude=latitude, longitude=longitude)
-        db.session.add(bucket_item)
+        db.session.add(item)
         db.session.commit()
-        public_id = bucket_item.public_item_id
-        b_list = BucketList.query.filter(BucketList.title==list_title).first()
-        b_list_id = b_list.list_id
-        return create_private_item(public_id, b_list_id, tour_link)
+    public_id = item.id
+    b_list = BucketList.query.filter(BucketList.title==list_title).first()
+    b_list_id = b_list.id
+    create_private_item(public_id, b_list_id, tour_link)
+    return redirect('/my-lists/{}'.format(list_id))
+
 
 
 def create_private_item(public_id, list_id, tour_link):
-    new_item = PrivateItem(id=public_id,list_id=list_id,
+    email = session['email']
+    # Check if a private item for that userexists with that title
+    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
+                                            user.email==email).all()
+
+    # If there is a private item with that title
+    if private_item:
+        flash("You already have an item with that title!")
+        return redirect('/my-lists')
+
+    new_item = PrivateItem(public_item_id=public_id,list_id=list_id,
                            tour_link=tour_link)
     db.session.add(new_item)
     db.session.commit()
     flash("Your item has been added!")
-    return redirect('/my-lists/{}'.format(list_id))
+
 
 
 @app.route('/check-off-item', methods=['POST'])

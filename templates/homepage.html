@@ -20,7 +20,7 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
           <h4 class="modal-title">Modal title</h4>
         </div>
         <div class="modal-body">
-          <form id="email-username-submit">
+          <form action='/facebook-login' id="email-username-submit" method='POST'>
             Please enter an email address and username.<br>
             This will allow you to login to WanderList without Facebook,<br>
             if you wish in the future.<br>
@@ -28,6 +28,7 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
             Email: <input id="email" type="text" name="email">
             <input type="hidden" name="id" id="facebook-id">
             <input type="hidden" name="name" id="facebook-name">
+            <input type="hidden" name="new" value="true">
 
             <input type="submit" value="submit">
           </form>
@@ -40,15 +41,18 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
   </div><!-- /.modal -->
 
 
+
+
 {% if email %}
   Hi {{ email }}!
   <p><a href="/my-lists">My Lists</a></p>
   <p><a href="/logout" onclick="FB.logout();">Logout</a></p>
+  <button id="logout-button">Logout</button>
 {% endif %}
 
 {% if not email %}
   <p><a href="/register">Register</a></p>
-  <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+  <fb:login-button scope="public_profile,email,user_friends" onlogin="checkLoginState();">
   </fb:login-button>
   <p><a href="/login">Login</a></p>
 {% endif %}
@@ -69,4 +73,33 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
     {% endfor %}
   {% endif %}
 </div>
+
+{% if email %}
+<div class="modal fade" id="add-private-item" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <form action='/add-item/public' method='POST'>
+          <input type='text' name='tour-link'>
+            List: <select name="list">
+              {% for list in lists %}
+                <option value="{{ list.title }}">{{ list.title }}</option>
+              {% endfor %}
+            </select><br>
+          <input type='hidden' name="public-item-id" value="{{ public_item_id }}">
+          <input type='submit' value='Add Item'>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endif %}
+
 {% endblock %}

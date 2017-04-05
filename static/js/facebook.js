@@ -1,25 +1,29 @@
 $(document).ready(function() {
   // When a user submits the modal form with email and username
-  $("#email-username-submit").on('submit', function(evt) {
-    $("#facebook-login-registration").modal("hide");
-    evt.preventDefault();
-    console.log("About to submit modal");
-    // Get the values from the form
-    var username = $("#username").val();
-    var email = $("#email").val();
-    var name = $("#facebook-name").val();
-    var id = $("#facebook-id").val();
-    var formInputs = {"new": true, "username": username, "email": email, "password": id, "name": name};
+  // $("#email-username-submit").on('submit', function(evt) {
+    // $("#facebook-login-registration").modal("hide");
+    // evt.preventDefault();
+    // console.log("About to submit modal");
+    // // Get the values from the form
+    // var username = $("#username").val();
+    // var email = $("#email").val();
+    // var name = $("#facebook-name").val();
+    // var id = $("#facebook-id").val();
+    // var formInputs = {"new": true, "username": username, "email": email, "password": id, "name": name};
 
-    // Make an AJAX request to the route that creates a user and then logs in
-    $.post('/facebook-login', formInputs, 
-                                function() { console.log('Post request new user worked');})
-
-    $('#logout').on('click', FB.logout(function(response)));
-      // user is now logged out
-
-  });
+    // // Make an AJAX request to the route that creates a user and then logs in
+    // $.post('/facebook-login', formInputs, 
+    //                             function() { console.log('Post request new user worked');})
+  // });
+  $("#logout-button").on('click', function () {
+    FB.getLoginStatus(function(response) {
+      FB.logout(function() {
+        window.location = '/logout';
+      });
+    })
+  })
 });
+
 
  // This is called with the results from from FB.getLoginStatus().
 function statusChangeCallback(response) {
