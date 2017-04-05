@@ -169,8 +169,8 @@ def process_login_info():
     email = request.form.get("email")
     password = request.form.get("password")
     
-    try:
-        user_query = User.query.filter(User.email==email).first()
+
+    user_query = User.query.filter(User.email==email).first()
     if user_query and user_query.password == password:
         session["email"] = user_query.email
         flash("You have successfully logged in!")
@@ -223,8 +223,7 @@ def check_for_user():
     print last_name
     print email
     
-    try:
-        user_query = User.query.filter(User.email==email).first()
+    user_query = User.query.filter(User.email==email).first()
 
     if user_query:
         return "user exists"
@@ -242,9 +241,9 @@ def login_user():
 
 
     print "New: " + new
-    new = bool(new)
     # if new user
-    if new == True:
+    if new == "true":
+        print "Got to new user"
         email = request.form.get('email')
         password = request.form.get('password')
         username = request.form.get('username')
@@ -441,7 +440,6 @@ def check_off_item():
     db.session.commit()
 
     return redirect('/{}/{}'.format(list_id,item_id))
-
 
 
 if __name__ == "__main__":
