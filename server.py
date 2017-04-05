@@ -170,10 +170,7 @@ def process_login_info():
     password = request.form.get("password")
     
     try:
-        user_query = User.query.filter(User.email==email).one()
-    except Exception, e:
-        user_query = False
-
+        user_query = User.query.filter(User.email==email).first()
     if user_query and user_query.password == password:
         session["email"] = user_query.email
         flash("You have successfully logged in!")
@@ -227,9 +224,7 @@ def check_for_user():
     print email
     
     try:
-        user_query = User.query.filter(User.email==email).one()
-    except Exception, e:
-        user_query = False
+        user_query = User.query.filter(User.email==email).first()
 
     if user_query:
         return "user exists"
@@ -304,10 +299,9 @@ def add_bucket_list():
     title = request.form.get('title')
     email = request.form.get('email')
 
-    try:
-        user_list = BucketList.query.filter(BucketList.email==email,
-                                            BucketList.title==title).one()
-    except Exception, e:
+    user_list = BucketList.query.filter(BucketList.email==email,
+                                        BucketList.title==title).first()
+    if not user_list:
         title = request.form.get('title')
         email = request.form.get('email')
         new_list = BucketList(email=email, title=title)
@@ -402,7 +396,7 @@ def process_add_bucket_item():
         # If the title of the object is the same, create a private item with that
         # public id.
         public_id = item.public_item_id
-        b_list = BucketList.query.filter(BucketList.title==list_title).one()
+        b_list = BucketList.query.filter(BucketList.title==list_title).first()
         b_list_id = b_list.list_id
         # Check if a private item for that userexists with that title
         private_item = PrivateItem.query.filter(PrivateItem.id==public_id, 
@@ -421,7 +415,7 @@ def process_add_bucket_item():
         db.session.add(bucket_item)
         db.session.commit()
         public_id = bucket_item.public_item_id
-        b_list = BucketList.query.filter(BucketList.title==list_title).one()
+        b_list = BucketList.query.filter(BucketList.title==list_title).first()
         b_list_id = b_list.list_id
         return create_private_item(public_id, b_list_id, tour_link)
 
@@ -442,7 +436,7 @@ def check_off_item():
     item_id = request.form.get("item-id")
     list_id = request.form.get("list-id")
 
-    item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
+    item = PrivateItem.query.filter(PrivateItem.id==item_id).first()
     item.checked_off = True
     db.session.commit()
 
