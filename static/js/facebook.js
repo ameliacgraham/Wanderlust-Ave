@@ -15,6 +15,9 @@ $(document).ready(function() {
     $.post('/facebook-login', formInputs, 
                                 function() { console.log('Post request new user worked');})
 
+    $('#logout').on('click', FB.logout(function(response)));
+      // user is now logged out
+
   });
 });
 
@@ -37,8 +40,6 @@ function statusChangeCallback(response) {
       console.log(response.email);
       console.log(response.name);
       console.log('Successful login for: ' + response.name);
-      document.getElementById('status').innerHTML =
-        'Thanks for logging in, ' + response.name + '!';
       var name = response.name;
       var id = response.id;
       var email = response.email;

@@ -190,14 +190,12 @@ def log_user_out():
     return redirect("/")
 
 
-@app.route('/facebook-token', methods=['POST'])
+@app.route('/facebook-friends')
 def get_facebook_info():
     """Gets a user's facebook info."""
-    token = request.form.get('token')
+    token = session['token']
     
-    # url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
-
-    url = 'https://graph.facebook.com/v2.8/me?fields=email%2Cname&access_token={}'.format(token)
+    url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
 
     r = requests.get(url)
     result = json.loads(r.text)
@@ -205,7 +203,7 @@ def get_facebook_info():
     print url
     print result
 
-    return render_template("facebook-login.html", result=result)
+    return jsonify(result)
 
 @app.route('/facebook', methods=['POST'])
 def check_for_user():

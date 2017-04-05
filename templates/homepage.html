@@ -3,10 +3,9 @@
 
 <h2>ADVENTURE AWAITS</h2>
 <script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=1322395004515505"></script>
-<div class="fb-login-button" data-max-rows="1" data-size="large" data-show-faces="true" data-auto-logout-link="true" onlogin="checkLoginState();"></div>
+<!-- <div class="fb-login-button" data-max-rows="1" data-size="large" data-show-faces="true" 
+scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginState();"></div> -->
 
-<!-- <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-</fb:login-button> -->
 
 <div id="fb-root"></div>
 <script src="/static/js/facebook.js"></script>
@@ -43,12 +42,14 @@
 
 {% if email %}
   Hi {{ email }}!
-  <p><a href="/logout">Logout</a></p>
   <p><a href="/my-lists">My Lists</a></p>
+  <p><a href="/logout" onclick="FB.logout();">Logout</a></p>
 {% endif %}
 
 {% if not email %}
   <p><a href="/register">Register</a></p>
+  <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+  </fb:login-button>
   <p><a href="/login">Login</a></p>
 {% endif %}
   <p><a href="/map">Map</a></p>
