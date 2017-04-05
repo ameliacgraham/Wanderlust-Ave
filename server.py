@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 import requests
 import json
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = "ABC"
@@ -20,25 +21,25 @@ def display_homepage():
     """Homepage"""
 
     public_items = PublicItem.query.all()
-    username = session.get("username")
+    email = session.get("email")
     return render_template("homepage.html", public_items=public_items,
-                           username=username)
+                           email=email)
 
 @app.route('/public/<pub_item_id>')
 def display_public_item_details(pub_item_id):
     """Displays info about a public item."""
 
-    username = session.get("username")
-    item_info = PublicItem.query.filter(PublicItem.public_item_id==pub_item_id).one()
+    email = session.get("email")
+    item_info = PublicItem.query.filter(PublicItem.id==pub_item_id).one()
     return render_template('public-item.html', 
                            item_info=item_info,
-                           username=username)
+                           email=email)
 
 @app.route('/<list_id>/<priv_item_id>')
 def display_private_item_details(list_id, priv_item_id):
     """Displays info about a private item."""
 
-    item_info = PrivateItem.query.filter(PrivateItem.priv_item_id==priv_item_id).one()
+    item_info = PrivateItem.query.filter(PrivateItem.id==priv_item_id).one()
     return render_template('private-item.html', 
                            item_info=item_info)
 
@@ -137,40 +138,44 @@ def process_registation_form():
     if request.method == 'GET':
         return render_template('registration-form.html')
 
-    email = request.form.get('email')
     username = request.form.get('username')
+    email = request.form.get('email')
     first_name = request.form.get('first-name')
     last_name = request.form.get('last-name')
     password = request.form.get('password')
-    username_query = User.query.filter(User.username==username).all()
+    # hashed_pw = bcrypt.hashpw(password.encode("UTF_8"),bcrypt.gensalt())
+    email_query = User.query.filter(User.email==email).all()
 
-    if username_query:
-        flash("An account for {} already exists!".format(username))
+    if email_query:
+        flash("An account for {} already exists!".format(email))
         return redirect("/login")
     else:
-        user = User(username=username, email=email, password=password, first_name=first_name,
-                    last_name=last_name)
+        user = User(email=email, password=password, first_name=first_name,
+                    last_name=last_name, username=username)
         db.session.add(user)
         db.session.commit()
     return redirect("/")
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def process_login_info():
     """Checks if user email and password exist on same account, then logs in or redirects."""
 
+    # Haslib
+
     if request.method == "GET":
         return render_template("login.html")
 
-    username = request.form.get("username")
+    email = request.form.get("email")
     password = request.form.get("password")
     
     try:
-        user_query = User.query.filter(User.username==username).one()
+        user_query = User.query.filter(User.email==email).one()
     except Exception, e:
         user_query = False
 
     if user_query and user_query.password == password:
-        session["username"] = user_query.username
+        session["email"] = user_query.email
         flash("You have successfully logged in!")
         return redirect("/my-lists")
     else:
@@ -181,20 +186,95 @@ def process_login_info():
 def log_user_out():
     """Logs a user out."""
 
-    del session['username']
+    del session['email']
     public_items = PublicItem.query.all()
     flash("You have successfully logged out!")
     return redirect("/")
+
+
+@app.route('/facebook-token', methods=['POST'])
+def get_facebook_info():
+    """Gets a user's facebook info."""
+    token = request.form.get('token')
+    
+    # url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
+
+    url = 'https://graph.facebook.com/v2.8/me?fields=email%2Cname&access_token={}'.format(token)
+
+    r = requests.get(url)
+    result = json.loads(r.text)
+    print token
+    print url
+    print result
+
+    return render_template("facebook-login.html", result=result)
+
+@app.route('/facebook', methods=['POST'])
+def check_for_user():
+    """Checks database for user with facebook email"""
+
+    facebook_id = request.form.get('id')
+    name = request.form.get('name')
+    email = request.form.get('email')
+    token = request.form.get('token')
+    first_name = name.split()[0]
+    last_name = name.split()[1]
+
+    print first_name
+    print last_name
+    print email
+    
+    try:
+        user_query = User.query.filter(User.email==email).one()
+    except Exception, e:
+        user_query = False
+
+    if user_query:
+        return "user exists"
+    else:
+        # pop up window asking for password
+        # add user to database
+        print "need email"
+        return "need email"
+
+@app.route('/facebook-login', methods=['POST'])
+def login_user():
+
+    new = request.form.get('new')
+    print "in Facebook login"
+
+
+    print "New: " + new
+    new = bool(new)
+    # if new user
+    if new == True:
+        email = request.form.get('email')
+        password = request.form.get('password')
+        username = request.form.get('username')
+        name = request.form.get('name')
+        first_name, last_name = name.split()
+        user = User(email=email, password=password, first_name=first_name,
+                    last_name=last_name, username=username)
+        db.session.add(user)
+        db.session.commit()
+    # If user exists
+    else:
+        email = request.form.get('email')
+        user = User.query.filter(User.email==email).first()
+        print "Find user"
+
+    session["email"] = email
+    return "logged in"
 
 @app.route('/my-lists')
 def display_bucket_lists():
     """Display users bucket lists."""
 
-    username = session.get("username")
-    user_bucket_lists = BucketList.query.filter(BucketList.username==username).all()
+    email = str(session.get("email"))
+    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
 
-    if username:
-        user = User.query.get(username)
+    if email:
+        user = User.query.get(email)
         progress_results = user.get_progress()
 
         items = progress_results['total_items']
@@ -220,15 +300,15 @@ def add_bucket_list():
     """Add new bucket list."""
 
     title = request.form.get('title')
-    username = request.form.get('username')
+    email = request.form.get('email')
 
     try:
-        user_list = BucketList.query.filter(BucketList.username==username,
+        user_list = BucketList.query.filter(BucketList.email==email,
                                             BucketList.title==title).one()
     except Exception, e:
         title = request.form.get('title')
-        username = request.form.get('username')
-        new_list = BucketList(username=username, title=title)
+        email = request.form.get('email')
+        new_list = BucketList(email=email, title=title)
         db.session.add(new_list)
         db.session.commit()
         flash("Your list has been created!")
@@ -246,7 +326,7 @@ def delete_priv_item():
     print del_item
 
     if del_item == 'delete':
-        item = PrivateItem.query.filter(PrivateItem.priv_item_id==item_id).one()
+        item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
         db.session.delete(item)
         db.session.commit()
 
@@ -258,7 +338,7 @@ def delete_priv_item():
 def display_bucket_list(list_id):
     """Displays a user's bucket list."""
 
-    bucket_list = BucketList.query.filter(BucketList.list_id==list_id).one()
+    bucket_list = BucketList.query.filter(BucketList.id==list_id).one()
     b_list_id = list_id
 
     places = []
@@ -287,9 +367,9 @@ def display_bucket_list(list_id):
 def display_add_item_form():
     """Displays bucket item form."""
 
-    username = session["username"]
+    email = session["email"]
 
-    lists = BucketList.query.filter(BucketList.username==username).all()
+    lists = BucketList.query.filter(BucketList.email==email).all()
 
     return render_template("add-item-form.html",
                            lists=lists,
@@ -300,7 +380,7 @@ def process_add_bucket_item():
     """Checks if item already exists in a list, if not then adds it."""
 
     title = request.form.get('title')
-    username = request.form.get('username')
+    email = request.form.get('email')
     tour_link = request.form.get('tour-link')
     image = request.form.get('image')
     description = request.form.get('description')
@@ -312,7 +392,7 @@ def process_add_bucket_item():
 
     # Query for the public item with the title as the input title
     item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
-    user = User.query.filter(User.username==username).one()
+    user = User.query.filter(User.email==email).one()
 
     # if there is a public item with that title
     if item:
@@ -323,15 +403,15 @@ def process_add_bucket_item():
         b_list = BucketList.query.filter(BucketList.title==list_title).one()
         b_list_id = b_list.list_id
         # Check if a private item for that userexists with that title
-        private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
-                                                user.username==username).all()
+        private_item = PrivateItem.query.filter(PrivateItem.id==public_id, 
+                                                user.email==email).all()
 
         # If there is a private item with that title
         if private_item:
             flash("You already have an item with that title!")
             return redirect('/my-lists')
         else:
-            create_private_item(public_id, b_list_id, tour_link)
+            return create_private_item(public_id, b_list_id, tour_link)
     # If there is not a public item with that title, create a public and private item    
     else:
         bucket_item = PublicItem(title=title,image=image,description=description,
@@ -345,7 +425,7 @@ def process_add_bucket_item():
 
 
 def create_private_item(public_id, list_id, tour_link):
-    new_item = PrivateItem(public_item_id=public_id,list_id=list_id,
+    new_item = PrivateItem(id=public_id,list_id=list_id,
                            tour_link=tour_link)
     db.session.add(new_item)
     db.session.commit()
@@ -360,7 +440,7 @@ def check_off_item():
     item_id = request.form.get("item-id")
     list_id = request.form.get("list-id")
 
-    item = PrivateItem.query.filter(PrivateItem.priv_item_id==item_id).one()
+    item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
     item.checked_off = True
     db.session.commit()
 

@@ -1,10 +1,10 @@
-from unittest import TestCase, main
+import unittest
 
 from server import app
 from model import db, example_data, connect_to_db
 
 
-class BucketTests(TestCase):
+class BucketTests(unittest.TestCase):
     """Tests for WanderList."""
 
     def setUp(self):
@@ -53,6 +53,9 @@ class BucketTests(TestCase):
                                             follow_redirects=True)
         self.assertIn("Create a new list", result.data)
 
+    ### second test login with different get results
+    
+
 
 
     """Flask tests that use the database."""
@@ -78,4 +81,4 @@ class BucketTests(TestCase):
         db.drop_all()
 
 if __name__ == '__main__':
-    main()
+    unittest.main()

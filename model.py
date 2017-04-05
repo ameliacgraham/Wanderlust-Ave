@@ -4,34 +4,34 @@ from datetime import datetime
 db = SQLAlchemy()
 
 
-
 class User(db.Model):
     """Users of WanderList."""
 
     __tablename__ = "users"
 
-    username = db.Column(db.String(32), primary_key=True)
-    password = db.Column(db.String(32), nullable=False)
+    email = db.Column(db.String(200), primary_key=True)
+    username = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(70), nullable=False)
     first_name = db.Column(db.String(32), nullable=False)
     last_name = db.Column(db.String(32), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
+    facebook_id = db.Column(db.Integer, nullable=True)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<User username: {}, name: {}{}>".format(self.username, self.first_name,
+        return "<User email: {}, name: {} {}>".format(self.email, self.first_name,
                                                         self.last_name)
 
     def get_progress(self):
         """Gets a user's progress for all items."""
 
-        total_items = (db.session.query((BucketList.username))
+        total_items = (db.session.query((BucketList.email))
                                  .join(PrivateItem)
-                                 .filter(BucketList.username==self.username).count())
+                                 .filter(BucketList.email==self.email).count())
 
-        checked_items = (db.session.query((BucketList.username))
+        checked_items = (db.session.query((BucketList.email))
                                  .join(PrivateItem)
-                                 .filter(BucketList.username==self.username, 
+                                 .filter(BucketList.email==self.email, 
                                          PrivateItem.checked_off==True).count())
         progress = {"total_items": total_items, "checked_items":checked_items}
         return progress
@@ -42,28 +42,28 @@ class BucketList(db.Model):
 
     __tablename__ = "bucket_lists"
 
-    list_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(32), db.ForeignKey('users.username'), nullable=False)
+    email = db.Column(db.String(32), db.ForeignKey('users.email'), nullable=False)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<Bucket List list_id: {}, title: {}, username: {}>".format(
-                                                                          self.list_id, 
-                                                                          self.title, 
-                                                                          self.username)
+        return "<Bucket List id: {}, title: {}, email: {}>".format(
+                                                                      self.id, 
+                                                                      self.title, 
+                                                                      self.email)
 
     user = db.relationship("User",
                             backref=db.backref("bucket_lists",
-                                               order_by=username))
+                                               order_by=email))
 
 class PublicItem(db.Model):
     """Public bucket list items."""
 
     __tablename__ = "public_items"
 
-    public_item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -74,7 +74,7 @@ class PublicItem(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<Public Item public_item_id: {} title: {}>".format(self.public_item_id, self.title)
+        return "<PublicItem id: {} title: {}>".format(self.id, self.title)
 
 def example_data():
         """Create example data for the test database."""
@@ -85,13 +85,12 @@ def example_data():
         db.session.add(item1)
         user = User(first_name="Hackbright",
                     last_name="Academy",
-                    username="balloonicorn",
                     password="party",
-                    email="balloonicorn@gmail.com")
+                    email="balloonicorn@gmail.com",
+                    username="balloonicorn")
         db.session.add(user)
-        bucket_list = BucketList(list_id=1, 
-                                 title="My Bucket List",
-                                 username="balloonicorn")
+        bucket_list = BucketList(title="My Bucket List",
+                                 email="balloonicorn@gmail.com")
         db.session.add(bucket_list)
         db.session.commit()
 
@@ -100,9 +99,9 @@ class PrivateItem(db.Model):
 
     __tablename__ = "private_items"
 
-    priv_item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    public_item_id = db.Column(db.Integer, db.ForeignKey("public_items.public_item_id"))
-    list_id = db.Column(db.Integer, db.ForeignKey("bucket_lists.list_id"))
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    public_item_id = db.Column(db.Integer, db.ForeignKey("public_items.id"))
+    list_id = db.Column(db.Integer, db.ForeignKey("bucket_lists.id"))
     tour_link = db.Column(db.String(200), nullable=True)
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -120,7 +119,7 @@ class PrivateItem(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<PrivateItem priv_item_id: {} list_id: {}>".format(self.priv_item_id,
+        return "<PrivateItem id: {} list_id: {}>".format(self.priv_item_id,
                                                                    self.list_id)
 
 class Journal(db.Model):
@@ -128,8 +127,8 @@ class Journal(db.Model):
 
     __tablename__ = "journals"
 
-    journal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    priv_item_id = db.Column(db.Integer, db.ForeignKey("private_items.priv_item_id"))
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    priv_item_id = db.Column(db.Integer, db.ForeignKey("private_items.id"))
     title = db.Column(db.String(100), nullable=True)
     date = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
@@ -140,8 +139,8 @@ class Journal(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""  
         
-        return "<Journal journal_id: {} priv_item_id: {}>".format(self.journal_id,
-                                                                  self.title)  
+        return "<Journal id: {} priv_item_id: {}>".format(self.id,
+                                                          self.title)  
 
 
 def connect_to_db(app, db_uri="postgresql:///wander_list"):

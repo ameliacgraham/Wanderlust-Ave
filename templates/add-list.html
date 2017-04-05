@@ -6,7 +6,7 @@
 <form action="/my-lists/add" method="POST">
   <label>Title</label>
     <input type="text" name="title" placeholder="My Bucket List"><br><br>
-    <input type="hidden" name="username" value={{ session["username"] }}>
+    <input type="hidden" name="email" value={{ session["email"] }}>
     <input type="submit">
 </form>
 
