@@ -187,6 +187,7 @@ def log_user_out():
     """Logs a user out."""
 
     del session['email']
+    del session['token']
     public_items = PublicItem.query.all()
     flash("You have successfully logged out!")
     return redirect("/")
@@ -217,6 +218,7 @@ def check_for_user():
     name = request.form.get('name')
     email = request.form.get('email')
     token = request.form.get('token')
+    session['token'] = token
     first_name = name.split()[0]
     last_name = name.split()[1]
 
