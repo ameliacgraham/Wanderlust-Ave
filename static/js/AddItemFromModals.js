@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $(".add").on("click", function(evt) {
+    $(".public-image").on("click", function(evt) {
         var publicId = $(this).data("id");
         $("#public-id").val(publicId);
         $("#add-private-item").modal("show");

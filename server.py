@@ -59,13 +59,18 @@ def process_search_form():
     form_input = request.args.get('public-search')
     keywords = form_input.split()
     matched_items = []
+    email = session.get('email')
+    lists = BucketList.query.filter(BucketList.email==email).all()
 
     for word in keywords:
         items = PublicItem.query.filter(PublicItem.title.like("%{}%".format(word))).all()
         for item_object in items:
             matched_items.append(item_object)
 
-    return render_template('search-results.html', matched_items=matched_items)
+    return render_template('search-results.html', 
+                            matched_items=matched_items,
+                            email=email,
+                            lists=lists)
 
 @app.route('/map')
 def display_google_map():
@@ -428,7 +433,7 @@ def process_add_bucket_item():
     b_list = BucketList.query.filter(BucketList.title==list_title).first()
     b_list_id = b_list.id
     create_private_item(public_id, b_list_id, tour_link)
-    return redirect('/my-lists/{}'.format(list_id))
+    return redirect('/my-lists/{}'.format(b_list_id))
 
 
 
@@ -441,7 +446,9 @@ def create_private_item(public_id, list_id, tour_link):
     print user
     print user.email
     # Check if a private item for that user exists with that title
-    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, user.email==email).first()
+    private_item = (db.session.query(PrivateItem).join(BucketList).join(User)
+                    .filter(PrivateItem.public_item_id==public_id, 
+                            User.email==email).first())
 
     # If there is a private item with that title
     if private_item:
