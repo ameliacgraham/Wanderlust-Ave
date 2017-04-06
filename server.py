@@ -22,23 +22,27 @@ def display_homepage():
 
     public_items = PublicItem.query.all()
     email = session.get("email")
-    return render_template("homepage.html", public_items=public_items,
+    lists = BucketList.query.filter(BucketList.email==email).all()
+
+    return render_template("homepage.html", 
+                           public_items=public_items,
+                           lists=lists,
                            email=email)
 
-@app.route('/public/<pub_item_id>')
-def display_public_item_details(pub_item_id):
-    """Displays info about a public item."""
+# @app.route('/public/<pub_item_id>')
+# def display_public_item_details(pub_item_id):
+#     """Displays info about a public item."""
 
-    email = session.get("email")
-    username = session.get("username")
-    lists = BucketList.query.filter(BucketList.email==email).all()
-    item_info = PublicItem.query.filter(PublicItem.id==pub_item_id).one()
-    return render_template('public-item.html', 
-                           item_info=item_info,
-                           lists=lists,
-                           email=email,
-                           username=username,
-                           public_item_id=pub_item_id)
+#     email = session.get("email")
+#     username = session.get("username")
+#     lists = BucketList.query.filter(BucketList.email==email).all()
+#     item_info = PublicItem.query.filter(PublicItem.id==pub_item_id).one()
+#     return render_template('public-item.html', 
+#                            item_info=item_info,
+#                            lists=lists,
+#                            email=email,
+#                            username=username,
+#                            public_item_id=pub_item_id)
 
 @app.route('/<list_id>/<priv_item_id>')
 def display_private_item_details(list_id, priv_item_id):
@@ -382,9 +386,19 @@ def display_add_item_form():
 
 @app.route('/add-item/public', methods=['POST'])
 def add_item_from_public():
-    create_private_item()
-    return redirect()
-
+    email = session['email']
+    public_id = request.form.get('id')
+    list_title = request.form.get('title')
+    print list_title
+    bucket_list = BucketList.query.filter(BucketList.title==list_title,
+                                          BucketList.email==email).first()
+    bucket_list_id = bucket_list.id
+    print "About to print list_id"
+    print bucket_list_id
+    tour_link = None
+    private_item = create_private_item(public_id, bucket_list_id, tour_link)
+    print private_item
+    return "Item added"
 
 
 @app.route('/add-item/process', methods=['POST'])
@@ -403,7 +417,6 @@ def process_add_bucket_item():
 
     # Query for the public item with the title as the input title
     item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
-    user = User.query.filter(User.email==email).one()
 
     # If there is not a public item with that title, create a public and private item    
     if not item:
@@ -421,16 +434,22 @@ def process_add_bucket_item():
 
 def create_private_item(public_id, list_id, tour_link):
     email = session['email']
-    # Check if a private item for that userexists with that title
-    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, 
-                                            user.email==email).all()
+    print public_id
+    print list_id
+    print email
+    user = User.query.filter(User.email==email).one()
+    print user
+    print user.email
+    # Check if a private item for that user exists with that title
+    private_item = PrivateItem.query.filter(PrivateItem.public_item_id==public_id, user.email==email).first()
 
     # If there is a private item with that title
     if private_item:
         flash("You already have an item with that title!")
         return redirect('/my-lists')
 
-    new_item = PrivateItem(public_item_id=public_id,list_id=list_id,
+    new_item = PrivateItem(public_item_id=public_id,
+                           list_id=list_id,
                            tour_link=tour_link)
     db.session.add(new_item)
     db.session.commit()

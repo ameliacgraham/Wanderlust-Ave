@@ -5,7 +5,7 @@
   {% if matched_items %}
     {% for item in matched_items %}
       {{ item.title }} <br>
-      <a href="/{{ item.public_item_id }}">
+      <a href="/public/{{ item.id }}">
       <img src="{{ item.image }}" alt="Bucket Item" width="128" height="128"><br> 
       </a>
     {% endfor %}

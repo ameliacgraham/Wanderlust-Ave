@@ -8,7 +8,7 @@ Progress: {{ checked_off_items }} / {{ items }}<br><br>
 <div>
   {% if user_bucket_lists %}
     {% for list in user_bucket_lists %}
-      <a href="/my-lists/{{ list.list_id }}">{{ list.title }}<br><br>
+      <a href="/my-lists/{{ list.id }}">{{ list.title }}<br><br>
     {% endfor %}
   {% endif %}
 </div>

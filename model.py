@@ -14,7 +14,7 @@ class User(db.Model):
     password = db.Column(db.String(70), nullable=False)
     first_name = db.Column(db.String(32), nullable=False)
     last_name = db.Column(db.String(32), nullable=False)
-    facebook_id = db.Column(db.Integer, nullable=True)
+    facebook_id = db.Column(db.String(50), nullable=True)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -100,8 +100,8 @@ class PrivateItem(db.Model):
     __tablename__ = "private_items"
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    public_item_id = db.Column(db.Integer, db.ForeignKey("public_items.id"))
-    list_id = db.Column(db.Integer, db.ForeignKey("bucket_lists.id"))
+    public_item_id = db.Column(db.Integer, db.ForeignKey("public_items.id"), nullable=False)
+    list_id = db.Column(db.Integer, db.ForeignKey("bucket_lists.id"), nullable=False)
     tour_link = db.Column(db.String(200), nullable=True)
     checked_off = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -119,8 +119,9 @@ class PrivateItem(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<PrivateItem id: {} list_id: {}>".format(self.priv_item_id,
-                                                                   self.list_id)
+        return "<PrivateItem id: {} list_id: {} public_item_id: {}>".format(self.id,
+                                                                   self.list_id,
+                                                                   self.public_item_id)
 
 class Journal(db.Model):
     """Private bucket list items."""

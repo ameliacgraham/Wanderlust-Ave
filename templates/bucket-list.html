@@ -8,7 +8,7 @@
   {% if bucket_list %}
     {% for item in bucket_list.priv_items %}
       {{ item.public_item.title }}<br>
-        <a href="/{{ item.list_id }}/{{ item.priv_item_id }}">
+        <a href="/{{ item.list_id }}/{{ item.id }}">
         <img src="{{ item.public_item.image}}" alt="Bucket Item" width="128" height="128"><br>
         </a>
     {% endfor %}
