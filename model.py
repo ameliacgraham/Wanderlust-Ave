@@ -16,6 +16,12 @@ class User(db.Model):
     last_name = db.Column(db.String(32), nullable=False)
     facebook_id = db.Column(db.String(50), nullable=True)
 
+    followed = db.relationship("User",
+                                secondary="friends",
+                                primaryjoin=("Friend.fb_friend == User.email"),
+                                secondaryjoin=("Friend.user == User.email"),
+                                backref=db.backref("followers"))
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
@@ -124,7 +130,7 @@ class PrivateItem(db.Model):
                                                                    self.public_item_id)
 
 class Journal(db.Model):
-    """Private bucket list items."""
+    """Journals for private items."""
 
     __tablename__ = "journals"
 
@@ -143,6 +149,20 @@ class Journal(db.Model):
         return "<Journal id: {} priv_item_id: {}>".format(self.id,
                                                           self.title)
 
+class Friend(db.Model):
+    """Facebook friend connections."""
+
+    __tablename__ = "friends"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user = db.Column(db.String(200), db.ForeignKey("users.email"), nullable=False)
+    fb_friend = db.Column(db.String(200), db.ForeignKey("users.email"), nullable=False)
+
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<Friend id: {} user: {} fb_friend: {}>".format(self.id, self.user, self.fb_friend)
 
 def connect_to_db(app, db_uri="postgresql:///wander_list"):
     """Connect the database to our Flask app."""
@@ -161,5 +181,5 @@ if __name__ == "__main__":
     from server import app
     connect_to_db(app)
     print "Connected to DB."
-    # db.create_all()
-    # # example_data()
+    db.create_all()
+    # example_data()

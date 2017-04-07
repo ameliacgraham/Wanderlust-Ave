@@ -1,7 +1,7 @@
 
 from jinja2 import StrictUndefined
 from flask import Flask, jsonify, render_template, redirect, request, flash, session
-from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal
+from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
 import os
@@ -204,21 +204,31 @@ def log_user_out():
     flash("You have successfully logged out!")
     return redirect("/")
 
+@app.route('/profile/<facebook_id>')
+def display_profile(facebook_id):
+    """Displays a user's profile page"""
+    user = User.query.filter(User.facebook_id==facebook_id).one()
+    email = session['email']
+    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+    private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
+                    .filter(User.email==user.email).all())
+    return render_template('profile.html',
+                            user=user,
+                            private_items=private_items,
+                            email=email,
+                            lists=user_bucket_lists)
 
 @app.route('/facebook-friends')
-def get_facebook_info():
-    """Gets a user's facebook info."""
-    token = session['token']
-    
-    url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
+def display_fb_friends():
+    """Displays a user's facebook friends."""
+    email = session['email']
+    user = User.query.get(email)
+    # list of user objects for friends
+    friends = user.followers
 
-    r = requests.get(url)
-    result = json.loads(r.text)
-    print token
-    print url
-    print result
+    return render_template("facebook-friends.html",
+                            friends=friends)
 
-    return jsonify(result)
 
 @app.route('/facebook', methods=['POST'])
 def check_for_user():
@@ -276,6 +286,30 @@ def login_user():
 
     session["username"] = username
     session["email"] = email
+
+    token = session['token']
+    url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
+    r = requests.get(url)
+    results = json.loads(r.text)
+    friends = []
+    for friend in results['friends']['data']:
+        facebook_id = str(friend['id'])
+        friends.append(facebook_id)
+
+    for facebook_id in friends:
+        # Find friend's user information
+        fb_friend = User.query.filter(User.facebook_id==facebook_id).first()
+        print fb_friend
+        # If it finds it, get the email
+        if fb_friend:
+            friend_email = fb_friend.email
+            email = request.form.get('email')
+            friend_query = Friend.query.filter(Friend.user==email, Friend.fb_friend==friend_email).first()
+            if not friend_query:
+                friendship = Friend(user=email, fb_friend=friend_email)
+                db.session.add(friendship)
+    db.session.commit()
+
     return redirect('/')
 
 @app.route('/my-lists')

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+  {% if friends %}
+    {% for friend in friends %}
+      <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
