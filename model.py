@@ -15,6 +15,7 @@ class User(db.Model):
     first_name = db.Column(db.String(32), nullable=False)
     last_name = db.Column(db.String(32), nullable=False)
     facebook_id = db.Column(db.String(50), nullable=True)
+    profile_picture = db.Column(db.String(200), default="https://s3-us-west-1.amazonaws.com/wanderlist-images/Wanderlust+Logo.png")
 
     followed = db.relationship("User",
                                 secondary="friends",
@@ -182,4 +183,4 @@ if __name__ == "__main__":
     connect_to_db(app)
     print "Connected to DB."
     db.create_all()
-    # example_data()
+    example_data()

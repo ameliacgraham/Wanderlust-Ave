@@ -63,7 +63,7 @@ function statusChangeCallback(response) {
           // if not "need email"
           else {
             // AJAX request to route to log user in
-            $.post('/facebook-login', {"new": false, "email": email}, function() {
+            $.post('/facebook/login', {"new": false, "email": email}, function() {
               console.log("Post request existing user");
             })
           }

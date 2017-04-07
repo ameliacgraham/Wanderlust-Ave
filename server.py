@@ -4,6 +4,7 @@ from flask import Flask, jsonify, render_template, redirect, request, flash, ses
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
+import facebook
 import os
 import requests
 import json
@@ -204,32 +205,6 @@ def log_user_out():
     flash("You have successfully logged out!")
     return redirect("/")
 
-@app.route('/profile/<facebook_id>')
-def display_profile(facebook_id):
-    """Displays a user's profile page"""
-    user = User.query.filter(User.facebook_id==facebook_id).one()
-    email = session['email']
-    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
-    private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
-                    .filter(User.email==user.email).all())
-    return render_template('profile.html',
-                            user=user,
-                            private_items=private_items,
-                            email=email,
-                            lists=user_bucket_lists)
-
-@app.route('/facebook-friends')
-def display_fb_friends():
-    """Displays a user's facebook friends."""
-    email = session['email']
-    user = User.query.get(email)
-    # list of user objects for friends
-    friends = user.followers
-
-    return render_template("facebook-friends.html",
-                            friends=friends)
-
-
 @app.route('/facebook', methods=['POST'])
 def check_for_user():
     """Checks database for user with facebook email"""
@@ -256,7 +231,7 @@ def check_for_user():
         print "need email"
         return "need email"
 
-@app.route('/facebook-login', methods=['POST'])
+@app.route('/facebook/login', methods=['POST'])
 def login_user():
 
     new = request.form.get('new')
@@ -273,10 +248,18 @@ def login_user():
         username = request.form.get('username')
         name = request.form.get('name')
         first_name, last_name = name.split()
+        # Get profile picture
+        token = session['token']
+        picture_url = 'https://graph.facebook.com/v2.8/me/picture?type=large&access_token={}'.format(token)
+        r = requests.get(picture_url)
+        picture = str(r.url)
+
         user = User(email=email, password=password, first_name=first_name,
-                    last_name=last_name, username=username, facebook_id=password)
+                    last_name=last_name, username=username, facebook_id=password,
+                    profile_picture=picture)
         db.session.add(user)
         db.session.commit()
+
     # If user exists
     else:
         email = request.form.get('email')
@@ -287,10 +270,12 @@ def login_user():
     session["username"] = username
     session["email"] = email
 
+    # Get Facebook friend ids
     token = session['token']
-    url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends&access_token={}'.format(token)
+    url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends%7Bid%2Cname%7D&access_token={}'.format(token)
     r = requests.get(url)
     results = json.loads(r.text)
+
     friends = []
     for friend in results['friends']['data']:
         facebook_id = str(friend['id'])
@@ -311,6 +296,49 @@ def login_user():
     db.session.commit()
 
     return redirect('/')
+
+@app.route('/profile/<facebook_id>')
+def display_profile(facebook_id):
+    """Displays a user's profile page"""
+    user = User.query.filter(User.facebook_id==facebook_id).one()
+    email = session['email']
+    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+    private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
+                    .filter(User.email==user.email).all())
+    return render_template('profile.html',
+                            user=user,
+                            private_items=private_items,
+                            email=email,
+                            lists=user_bucket_lists)
+
+@app.route('/facebook/friends')
+def display_fb_friends():
+    """Displays a user's facebook friends."""
+    email = session['email']
+    user = User.query.get(email)
+    # list of user objects for friends
+    friends = user.followers
+    token = session['token']
+
+    return render_template("facebook-friends.html",
+                            friends=friends)
+
+@app.route('/facebook/post')
+def post_completed_bucket_item():
+    """Post to Facebook about completed bucket item"""
+    token = session['token']
+    graph = facebook.GraphAPI(access_token=token, version='2.8')
+
+    # attachment =  {
+    # 'name': 'Link name'
+    # 'link': 'https://www.example.com/',
+    # 'caption': 'Check out this example',
+    # 'description': 'This is a longer description of the attachment',
+    # 'picture': 'https://www.example.com/thumbnail.jpg'
+    # }
+
+    graph.put_wall_post(message='Check this out...', attachment=attachment)
+    return "Wall post successful"
 
 @app.route('/my-lists')
 def display_bucket_lists():

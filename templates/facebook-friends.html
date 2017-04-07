@@ -4,7 +4,9 @@
 <div>
   {% if friends %}
     {% for friend in friends %}
-      <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a>
+      <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a><br>
+      <input type="image" src="{{ friend.profile_picture }}" 
+              alt="Profile Picture" width="128" height="128"><br>
     {% endfor %}
   {% endif %}
 </div>
