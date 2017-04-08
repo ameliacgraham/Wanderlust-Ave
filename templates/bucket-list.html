@@ -1,9 +1,37 @@
 {% extends 'base.html' %}
+{% block head %}
+<script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
+<script src="/static/js/progressWave.js" language="JavaScript"></script>
+<style>
+    .liquidFillGaugeText { font-family: Helvetica; font-weight: bold; }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h2> {{ bucket_list.title }} </h2>
 <p><a href="/add-item-form">Add a new item</a></p>
 <p> Progress: {{ progress }} </p>
+
+<svg id="fillgauge" width="97%" height="250" onclick=""></svg>
+<script language="JavaScript">
+    $.get('/progress.json', function(results) {
+        var items = results['total_items'];
+        var checkedOffItems = results['checked_items'];
+        var percentComplete = results['percent_complete'];
+        var gauge = loadLiquidFillGauge("fillgauge", percentComplete, config);
+        var config = liquidFillGaugeDefaultSettings();
+        config.textVertPosition = 0.8;
+        config.waveAnimateTime = 5000;
+        config.waveHeight = 0.15;
+        config.waveOffset = 0.25;
+        config.valueCountUp = false;
+        config.displayPercent = false;
+
+    });
+
+</script>
+
 <div>
   {% if bucket_list %}
     {% for item in bucket_list.priv_items %}

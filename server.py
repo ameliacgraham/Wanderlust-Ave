@@ -362,6 +362,17 @@ def display_bucket_lists():
         flash("You are not signed in")
         return redirect('/login')
 
+@app.route('/progress.json')
+def get_progress_of_all_items():
+     email = str(session.get("email"))
+     if email:
+        user = User.query.get(email)
+        progress_results = user.get_progress()
+
+        return jsonify(progress_results)
+
+
+
 @app.route('/my-lists/add-form')
 def display_add_list_form():
     """Display form to add new bucket list."""

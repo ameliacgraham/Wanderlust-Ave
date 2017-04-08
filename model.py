@@ -40,7 +40,12 @@ class User(db.Model):
                                  .join(PrivateItem)
                                  .filter(BucketList.email==self.email, 
                                          PrivateItem.checked_off==True).count())
-        progress = {"total_items": total_items, "checked_items":checked_items}
+
+        percent_complete = (float(checked_items)/total_items) * 100
+
+        progress = {"total_items": total_items, 
+                    "checked_items":checked_items, 
+                    "percent_complete": percent_complete}
         return progress
 
 
