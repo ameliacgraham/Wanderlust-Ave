@@ -41,14 +41,6 @@ def display_homepage():
                            lists=lists,
                            email=email)
 
-@app.route('/<list_id>/<priv_item_id>')
-def display_private_item_details(list_id, priv_item_id):
-    """Displays info about a private item."""
-
-    item_info = PrivateItem.query.filter(PrivateItem.id==priv_item_id).one()
-    return render_template('private-item.html', 
-                           item_info=item_info)
-
 @app.route('/search')
 def process_search_form():
     """Processes a search form."""
@@ -142,12 +134,9 @@ def display_flight_results():
     return render_template('flight-results.html', flights=flights)
 
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['POST'])
 def process_registation_form():
     """Display and process registration form"""
-
-    if request.method == 'GET':
-        return render_template('registration-form.html')
 
     username = request.form.get('username')
     email = request.form.get('email')
@@ -159,7 +148,7 @@ def process_registation_form():
 
     if email_query:
         flash("An account for {} already exists!".format(email))
-        return redirect("/login")
+        return redirect("/")
     else:
         user = User(email=email, password=password, first_name=first_name,
                     last_name=last_name, username=username)
@@ -179,7 +168,9 @@ def process_login_info():
     
 
     user_query = User.query.filter(User.email==email).first()
+    username = user_query.username
     if user_query and user_query.password == password:
+        session["username"] = username
         session["email"] = user_query.email
         flash("You have successfully logged in!")
         return redirect("/my-lists")
@@ -438,19 +429,6 @@ def display_bucket_list(list_id):
                            gm_api_key=gm_api_key,
                            places=places,
                            progress=progress)
-
-# @app.route('/add-item-form', methods=['GET', 'POST'])
-# def display_add_item_form():
-#     """Displays bucket item form."""
-
-#     email = session["email"]
-
-#     lists = BucketList.query.filter(BucketList.email==email).all()
-#     print(email, lists)
-#     return render_template("add-item-form.html",
-#                            lists=lists,
-#                            gm_api_key=gm_api_key)
-    
 
 @app.route('/add-item/public', methods=['POST'])
 def add_item_from_public():

@@ -12,9 +12,9 @@ $(document).ready(function() {
         });
         $("#private-item-details").modal("show");
     });
-//     $("#edit-button").submit(function(evt) {
-//         evt.preventDefault();
-//         $("private-item-details").modal("hide");
-//         });
+    $("#edit-button").submit(function(evt) {
+        evt.preventDefault();
+        $("private-item-details").modal("hide");
+        });
 });
 
