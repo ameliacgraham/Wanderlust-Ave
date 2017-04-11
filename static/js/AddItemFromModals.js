@@ -14,6 +14,3 @@ $(document).ready(function() {
             });
         });
 });
-
-// var listId = $(this).data("list")
-// $("#list-id").val()

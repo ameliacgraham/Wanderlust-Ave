@@ -54,8 +54,8 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
 {% if not email %}
   <p><a href="/register">Register</a></p>
   <fb:login-button scope="public_profile,email,user_friends" onlogin="checkLoginState();">
-  </fb:login-button>
-  <p><a href="/login">Login</a></p>
+  </fb:login-button><br>
+  <button id="login-button">Login</button>
 {% endif %}
   <p><a href="/map">Map</a></p>
   <p><a href="/flight-search">Search cheap flights by month</a></p>
@@ -98,7 +98,32 @@ scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginSta
 </div><!-- /.modal -->
 {% endif %}
 
+<div class="modal fade" id="login-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Login</h4>
+      </div>
+      <div class="modal-body">
+        <form action="/login" method="POST">
+          <label>Email:</label>
+            <input type="text" name="email" id="email" placeholder="email" required><br><br>
+          <label>Password:</label>
+            <input type="password" name="password" id="password" placeholder="password" required><br><br>
+            <input type="submit" id="login-submit"value="Login">
+        </form>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+
 <script src="/static/js/addItemFromModals.js"></script>
 <script src="/static/js/facebook.js"></script>
+<script src="/static/js/loginModal.js"></script>
 
 {% endblock %}

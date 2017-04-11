@@ -168,17 +168,14 @@ def process_registation_form():
     return redirect("/")
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def process_login_info():
     """Checks if user email and password exist on same account, then logs in or redirects."""
 
-    # Haslib
-
-    if request.method == "GET":
-        return render_template("login.html")
-
     email = request.form.get("email")
+    print email
     password = request.form.get("password")
+    print password
     
 
     user_query = User.query.filter(User.email==email).first()
@@ -187,8 +184,7 @@ def process_login_info():
         flash("You have successfully logged in!")
         return redirect("/my-lists")
     else:
-        flash("Email or Password is incorrect. Please try again!")
-        return redirect("/login")
+        return "Email or Password is incorrect. Please try again!"
 
 @app.route('/logout')
 def log_user_out():
