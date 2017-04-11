@@ -1,9 +1,11 @@
 
 from jinja2 import StrictUndefined
-from flask import Flask, jsonify, render_template, redirect, request, flash, session
+from flask import Flask, jsonify, render_template, redirect, request, flash, session, url_for, send_from_directory
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend
+from werkzeug.utils import secure_filename
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime
+import boto3
 import facebook
 import os
 import requests
@@ -11,11 +13,20 @@ import json
 import bcrypt
 
 app = Flask(__name__)
-app.secret_key = "ABC"
+app.secret_key = "BANNSALKSIAJAKL"
 app.jinja_env.undefined = StrictUndefined
+
+UPLOAD_FOLDER = '/static/images'
+ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Max photo size is 16 mb
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 gm_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 travel_payouts_api = os.environ['TRAVEL_PAYOUTS_API']
+AWS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 @app.route('/')
 def display_homepage():
@@ -29,21 +40,6 @@ def display_homepage():
                            public_items=public_items,
                            lists=lists,
                            email=email)
-
-# @app.route('/public/<pub_item_id>')
-# def display_public_item_details(pub_item_id):
-#     """Displays info about a public item."""
-
-#     email = session.get("email")
-#     username = session.get("username")
-#     lists = BucketList.query.filter(BucketList.email==email).all()
-#     item_info = PublicItem.query.filter(PublicItem.id==pub_item_id).one()
-#     return render_template('public-item.html', 
-#                            item_info=item_info,
-#                            lists=lists,
-#                            email=email,
-#                            username=username,
-#                            public_item_id=pub_item_id)
 
 @app.route('/<list_id>/<priv_item_id>')
 def display_private_item_details(list_id, priv_item_id):
@@ -323,66 +319,50 @@ def display_fb_friends():
     return render_template("facebook-friends.html",
                             friends=friends)
 
-@app.route('/facebook/post')
+@app.route('/facebook/post', methods=['POST'])
 def post_completed_bucket_item():
     """Post to Facebook about completed bucket item"""
     token = session['token']
     graph = facebook.GraphAPI(access_token=token, version='2.8')
 
-    # attachment =  {
-    # 'name': 'Link name'
-    # 'link': 'https://www.example.com/',
-    # 'caption': 'Check out this example',
-    # 'description': 'This is a longer description of the attachment',
-    # 'picture': 'https://www.example.com/thumbnail.jpg'
-    # }
+    image = request.form.get('image')
+    title = request.form.get('title')
+    caption = "I just checked {} off of my bucket list!".format(title)
 
-    graph.put_wall_post(message='Check this out...', attachment=attachment)
+
+    attachment =  {
+    'name': 'Wanderlust Ave',
+    'link': 'www.wanderlustave.com',
+    'caption': caption,
+    'picture': image
+    }
+
+    graph.put_wall_post(message=caption, attachment=attachment)
     return "Wall post successful"
 
-@app.route('/my-lists')
+@app.route('/my-lists', methods=['GET', 'POST'])
 def display_bucket_lists():
     """Display users bucket lists."""
 
-    email = str(session.get("email"))
-    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+    if request.method == 'GET':
+        email = str(session.get("email"))
+        user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
 
-    if email:
-        user = User.query.get(email)
-        progress_results = user.get_progress()
+        if email:
+            user = User.query.get(email)
+            progress_results = user.get_progress()
 
-        items = progress_results['total_items']
-        checked_off_items = progress_results['checked_items']
+            items = progress_results['total_items']
+            checked_off_items = progress_results['checked_items']
 
-        return render_template("user-lists.html", 
-                            user_bucket_lists=user_bucket_lists,
-                            items=items,
-                            checked_off_items=checked_off_items)
-    else:
-        flash("You are not signed in")
-        return redirect('/login')
-
-@app.route('/progress.json')
-def get_progress_of_all_items():
-     email = str(session.get("email"))
-     if email:
-        user = User.query.get(email)
-        progress_results = user.get_progress()
-
-        return jsonify(progress_results)
-
-
-
-@app.route('/my-lists/add-form')
-def display_add_list_form():
-    """Display form to add new bucket list."""
-
-    return render_template("add-list.html")
-
-
-@app.route('/my-lists/add', methods=['POST'])
-def add_bucket_list():
-    """Add new bucket list."""
+            return render_template("user-lists.html", 
+                                user_bucket_lists=user_bucket_lists,
+                                email=email,
+                                items=items,
+                                checked_off_items=checked_off_items)
+        else:
+            flash("You are not signed in")
+            return redirect('/login')
 
     title = request.form.get('title')
     email = request.form.get('email')
@@ -396,12 +376,26 @@ def add_bucket_list():
         db.session.add(new_list)
         db.session.commit()
         flash("Your list has been created!")
-        return redirect('/my-lists')
+        return "List Added"
+    elif title == "":
+        return "Please choose a title for your list"
 
-    flash("You already have a list named {}".format(title))
-    return redirect('/my-lists/add')
+    # flash("You already have a list named {}".format(title))
+    return "Duplicate List"
 
-@app.route('/delete-item', methods=['POST'])
+
+@app.route('/progress.json')
+def get_progress_of_all_items():
+     email = str(session.get("email"))
+     if email:
+        user = User.query.get(email)
+        progress_results = user.get_progress()
+
+        return jsonify(progress_results)
+
+
+
+@app.route('/delete-item', methods=['DELETE'])
 def delete_priv_item():
     """Deletes an item from a user's bucket list."""
 
@@ -449,17 +443,17 @@ def display_bucket_list(list_id):
                            places=places,
                            progress=progress)
 
-@app.route('/add-item-form', methods=['GET', 'POST'])
-def display_add_item_form():
-    """Displays bucket item form."""
+# @app.route('/add-item-form', methods=['GET', 'POST'])
+# def display_add_item_form():
+#     """Displays bucket item form."""
 
-    email = session["email"]
+#     email = session["email"]
 
-    lists = BucketList.query.filter(BucketList.email==email).all()
-    print(email, lists)
-    return render_template("add-item-form.html",
-                           lists=lists,
-                           gm_api_key=gm_api_key)
+#     lists = BucketList.query.filter(BucketList.email==email).all()
+#     print(email, lists)
+#     return render_template("add-item-form.html",
+#                            lists=lists,
+#                            gm_api_key=gm_api_key)
     
 
 @app.route('/add-item/public', methods=['POST'])
@@ -490,6 +484,7 @@ def process_add_bucket_item():
     list_title = request.form.get('list')
     latitude = request.form.get('latitude')
     longitude = request.form.get('longitude')
+    print list_title
     print latitude
     print longitude
 
@@ -525,16 +520,14 @@ def create_private_item(public_id, list_id, tour_link):
 
     # If there is a private item with that title
     if private_item:
-        flash("You already have an item with that title!")
-        return redirect('/my-lists')
+        return "Duplicate title!"
 
     new_item = PrivateItem(public_item_id=public_id,
                            list_id=list_id,
                            tour_link=tour_link)
     db.session.add(new_item)
     db.session.commit()
-    flash("Your item has been added!")
-
+    return "Item added"
 
 
 @app.route('/check-off-item', methods=['POST'])
@@ -549,6 +542,39 @@ def check_off_item():
     db.session.commit()
 
     return redirect('/{}/{}'.format(list_id,item_id))
+
+def allowed_file(filename):
+    return ("." in filename and filename.rsplit('.', 1)[1].lower() 
+                in ALLOWED_EXTENSIONS)
+
+@app.route('/fileupload', methods=['POST'])
+def upload_file():
+    # Check if request has the file part
+    if 'file' not in request.files:
+        flash('No file part')
+    if file.filename == "":
+        flash("No selected file")
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('uploaded_file', filename=filename))
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    uploaded_file = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+    aws_key = AWS_KEY_ID
+    aws_secret_key = AWS_SECRET_KEY
+
+    filename = file_name
+    bucket_name = "wanderlist-images"
+    s3 = boto3.resource('s3')
+    data = open(filename, 'rb')
+    s3.Bucket(bucket_name).put_object(Key=filename, Body=data)
+
+    image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
+
+    return image_url
 
 
 if __name__ == "__main__":

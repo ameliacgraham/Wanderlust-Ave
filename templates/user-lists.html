@@ -9,7 +9,7 @@
 
 {% block content %}
 
-<p><a href="/my-lists/add-form">Create a new list</a></p>
+<button id="create-new-list-button">Create a new list</button>
 
 Progress: {{ checked_off_items }} / {{ items }}<br><br>
 
@@ -24,8 +24,11 @@ Progress: {{ checked_off_items }} / {{ items }}<br><br>
 <script language="JavaScript">
     $.get('/progress.json', function(results) {
         var items = results['total_items'];
+        console.log(items);
         var checkedOffItems = results['checked_items'];
+        console.log(checkedOffItems);
         var percentComplete = results['percent_complete'];
+        console.log(percentComplete);
         var gauge = loadLiquidFillGauge("fillgauge", percentComplete, config);
         var config = liquidFillGaugeDefaultSettings();
         config.textVertPosition = 0.8;
@@ -39,4 +42,32 @@ Progress: {{ checked_off_items }} / {{ items }}<br><br>
 
 </script>
 </div>
+
+
+{% if email %}
+<div class="modal fade" id="add-bucket-list" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Create A List</h4>
+      </div>
+      <div class="modal-body">
+        <form action="/my-lists" id='list-modal' method='POST'>
+          <label>Title: </label>
+            <input type="text" name="title" id="list-title" placeholder="My Bucket List"><br><br>
+            <input type="hidden" name="email" id="email" value={{ session["email"] }}>
+            <input type="submit" value="Create">
+        </form>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endif %}
+
+<script src="/static/js/addListModal.js"></script>
+
+
+
+
 {% endblock %}

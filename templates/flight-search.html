@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
-{% block content %}
 
-<h1>FLight Search</h1>
+{% block head %}
+<h1>Flight Search</h1>
+{% endblock %}
+
+{% block content %}
 
 <form action="/flight-results" id="flight-form" method="GET">
   <label>Origin</label>

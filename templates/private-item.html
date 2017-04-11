@@ -9,7 +9,7 @@
     Longitude: {{ item_info.public_item.longitude }} <br>
     Checked Off: {{ item_info.checked_off }}
 
-    <form id="del-item" action="/delete-item" method='POST'>
+    <form id="del-item" action="/delete-item" method='DELETE'>
       <input type="checkbox" name="delete-item" value="delete">
       <input type="hidden" name="item-id" value={{ item_info.id }}>
       <input id="del-button" type="submit" name="del-submit" value="DELETE">
