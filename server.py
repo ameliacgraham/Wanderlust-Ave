@@ -373,12 +373,33 @@ def display_bucket_lists():
 
 @app.route('/progress.json')
 def get_progress_of_all_items():
-     email = str(session.get("email"))
-     if email:
-        user = User.query.get(email)
-        progress_results = user.get_progress()
+    email = str(session.get("email"))
+    all_items = request.args.get("all_items")
+    b_list_id = request.args.get("list_id")
+    if email:
+        if all_items == "True":
+            user = User.query.get(email)
+            progress_results = user.get_progress()
+            return jsonify(progress_results)
+        else:
+            bucket_list = BucketList.query.filter(BucketList.id==b_list_id).first()
 
-        return jsonify(progress_results)
+            all_list_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id).count()
+            checked_off_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id, PrivateItem.checked_off==True).count()
+            if all_list_items == 0:
+                progress_results = {"checked_off_items": 0,
+                                    "all_list_items": 0,
+                                    "percentage_complete": 0}
+                return jsonify(progress_results)
+
+            else:
+                progress = str(checked_off_items) + "/" + str(all_list_items)
+                percentage_complete = (float(checked_off_items)/all_list_items) * 100
+                progress_results = {"checked_off_items": checked_off_items,
+                                    "all_list_items": all_list_items,
+                                    "percentage_complete": percentage_complete}
+                return jsonify(progress_results)
+
 
 
 
@@ -450,32 +471,65 @@ def add_item_from_public():
 @app.route('/add-item/process', methods=['POST'])
 def process_add_bucket_item():
     """Checks if item already exists in a list, if not then adds it."""
+    # Check if request has the file part
+    print "Request files: ", request.files
+    if 'image' not in request.files:
+        print "No file part"
+        flash('No file part')
+        return "No file"
+    file = request.files['image']
+    if file.filename == "":
+        print "filename is empty"
+        flash("No selected file")
+        return "No selected file"
+    if file and allowed_file(file.filename):
+        print "About to upload to s3"
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        uploaded_file = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-    title = request.form.get('title')
-    tour_link = request.form.get('tour-link')
-    image = request.form.get('image') # possibly request.file
-    description = request.form.get('description')
-    list_title = request.form.get('list')
-    latitude = request.form.get('latitude')
-    longitude = request.form.get('longitude')
-    print list_title
-    print latitude
-    print longitude
+        aws_key = AWS_KEY_ID
+        aws_secret_key = AWS_SECRET_KEY
 
-    # Query for the public item with the title as the input title
-    item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
+        bucket_name = "wanderlist-images"
+        s3 = boto3.resource('s3')
+        data = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb')
+        s3.Bucket(bucket_name).put_object(Key=filename, Body=data, ACL='public-read', ContentType='image/jpeg')
 
-    # If there is not a public item with that title, create a public and private item    
-    if not item:
-        item = PublicItem(title=title,image=image,description=description,
-                                  latitude=latitude, longitude=longitude)
-        db.session.add(item)
-        db.session.commit()
-    public_id = item.id
-    b_list = BucketList.query.filter(BucketList.title==list_title).first()
-    b_list_id = b_list.id
-    create_private_item(public_id, b_list_id, tour_link)
-    return redirect('/my-lists/{}'.format(b_list_id))
+        image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
+            
+
+        title = request.form.get('title')
+        tour_link = request.form.get('tour-link')
+        image = image_url
+        description = request.form.get('description')
+        list_title = request.form.get('list')
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+        country = request.form.get('country')
+        address = request.form.get('address')
+        print list_title
+        print latitude
+        print longitude
+
+        # Query for the public item with the title as the input title
+        item = PublicItem.query.filter(PublicItem.title.ilike(title)).first()
+
+        # If there is not a public item with that title, create a public and private item    
+        if not item:
+            item = PublicItem(title=title,image=image,description=description,
+                                      latitude=latitude, longitude=longitude)
+            db.session.add(item)
+            db.session.commit()
+        public_id = item.id
+        b_list = BucketList.query.filter(BucketList.title==list_title).first()
+        b_list_id = b_list.id
+        create_private_item(public_id, b_list_id, tour_link)
+        return redirect('/my-lists/{}'.format(b_list_id))
+
+def allowed_file(filename):
+    return ("." in filename and filename.rsplit('.', 1)[1].lower() 
+            in ALLOWED_EXTENSIONS)
 
 
 
@@ -517,55 +571,6 @@ def check_off_item():
 
     return redirect('/{}/{}'.format(list_id,item_id))
 
-def allowed_file(filename):
-    return ("." in filename and filename.rsplit('.', 1)[1].lower() 
-                in ALLOWED_EXTENSIONS)
-
-@app.route('/fileupload', methods=['POST'])
-def upload_file():
-    # Check if request has the file part
-    print "Request files: ", request.files
-    if 'file' not in request.files:
-        print "No file part"
-        flash('No file part')
-        return "No file"
-    file = request.files['file']
-    if file.filename == "":
-        print "filename is empty"
-        flash("No selected file")
-        return "No selected file"
-    if file and allowed_file(file.filename):
-        print "About to upload to s3"
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('uploaded_file', filename=filename))
-        # aws_key = AWS_KEY_ID
-        # aws_secret_key = AWS_SECRET_KEY
-
-        # bucket_name = "wanderlist-images"
-        # s3 = boto3.resource('s3')
-        # data = open(filename, 'rb')
-        # s3.Bucket(bucket_name).put_object(Key=filename, Body=data)
-
-        # image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
-
-        # return image_url
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    uploaded_file = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-    aws_key = AWS_KEY_ID
-    aws_secret_key = AWS_SECRET_KEY
-
-    bucket_name = "wanderlist-images"
-    s3 = boto3.resource('s3')
-    data = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb')
-    s3.Bucket(bucket_name).put_object(Key=filename, Body=data, ACL='public-read', ContentType='image/jpeg')
-
-    image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
-
-    return image_url
 
 
 if __name__ == "__main__":

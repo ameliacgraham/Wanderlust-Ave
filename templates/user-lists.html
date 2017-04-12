@@ -20,9 +20,13 @@ Progress: {{ checked_off_items }} / {{ items }}<br><br>
   {% endif %}
 
 <div>
-<svg id="fillgauge" width="97%" height="250" onclick=""></svg>
+<svg id="fillgauge" width="97%" height="250" onclick="">
+  <pattern id = "globe" height = "100%" width = "100%"            
+                   patternContentUnits = "objectBoundingBox">
+       <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
+ </svg>
 <script language="JavaScript">
-    $.get('/progress.json', function(results) {
+    $.get('/progress.json', {"all_items": "True"}, function(results) {
         var items = results['total_items'];
         console.log(items);
         var checkedOffItems = results['checked_items'];

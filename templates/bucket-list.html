@@ -13,9 +13,9 @@
 
 <button id="create-new-item-button" data-list="{{ bucket_list.title }}">Create a new item</button>
 <p> Progress: {{ progress }} </p>
+<input type="hidden" id="bucket-id" value="{{ b_list }}">
 
 <svg id="fillgauge" width="97%" height="250" onclick="">
-  <circle id="logo" cx="382" cy="126" r="118" fill="url(#globe)"/>
   <pattern id = "globe" height = "100%" width = "100%"            
                    patternContentUnits = "objectBoundingBox">
        <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
@@ -24,12 +24,13 @@
 
 
 <script language="JavaScript">
-    $.get('/progress.json', function(results) {
-        var items = results['total_items'];
+    var bucketListId = $("#bucket-id").val();
+    $.get('/progress.json', {"all_items": "False", "list_id": bucketListId}, function(results) {
+        var items = results['all_list_items'];
         console.log(items);
-        var checkedOffItems = results['checked_items'];
+        var checkedOffItems = results['checked_off_items'];
         console.log(checkedOffItems);
-        var percentComplete = results['percent_complete'];
+        var percentComplete = results['percentage_complete'];
         console.log(percentComplete);
         var gauge = loadLiquidFillGauge("fillgauge", percentComplete, config);
         var config = liquidFillGaugeDefaultSettings();
@@ -118,20 +119,19 @@
                 places.forEach(function(place) {
                   var latitude = place.geometry.location.lat();
                   var longitude = place.geometry.location.lng();
-                  var locality = place.address_components[3].long_name;
-                  var region = place.address_components[5].long_name;
-                  var country = place.address_components[6].long_name;
+                  // Country is always the last index on address_components
+                  var country = place.address_components[place.address_components.length-1].long_name;
+                  var address = place.formatted_address;
+
 
                   document.getElementById('lat').value = latitude;
                   document.getElementById('lon').value = longitude;
-                  document.getElementById('locality').value = locality;
-                  document.getElementById('region').value = region;
                   document.getElementById('country').value = country;
+                  document.getElementById('address').value = address;
                   console.log(document.getElementById('lat'));
                   console.log(document.getElementById('lon'));
-                  console.log(document.getElementById('locality'));
-                  console.log(document.getElementById('region'));
                   console.log(document.getElementById('country'));
+                  console.log(document.getElementById('address'));
                 });
               });
             }
@@ -149,9 +149,8 @@
             <input type="text" name="description" id="description"><br><br>
             <input id="lat" type="hidden" name="latitude" value="">
             <input id="lon" type="hidden" name="longitude" value="">
-            <input id="locality" type="hidden" name="locality" value="">
-            <input id="region" type="hidden" name="region" value="">
             <input id="country" type="hidden" name="country" value="">
+            <input id="address" type="hidden" name="address" value="">
 
             <input type='hidden' name="list" id='list-title'>
             <input type="submit">
