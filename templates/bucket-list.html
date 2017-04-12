@@ -3,7 +3,7 @@
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="/static/js/progressWave.js" language="JavaScript"></script>
 <style>
-    .liquidFillGaugeText { font-family: Helvetica; font-weight: bold; }
+    .liquidFillGaugeText { font-family: Times New Roman; font-weight: bold; }
 </style>
 {% endblock %}
 
@@ -14,7 +14,15 @@
 <button id="create-new-item-button" data-list="{{ bucket_list.title }}">Create a new item</button>
 <p> Progress: {{ progress }} </p>
 
-<svg id="fillgauge" width="97%" height="250" onclick=""></svg>
+<svg id="fillgauge" width="97%" height="250" onclick="">
+  <circle id="logo" cx="382" cy="126" r="118" fill="url(#globe)"/>
+  <pattern id = "globe" height = "100%" width = "100%"            
+                   patternContentUnits = "objectBoundingBox">
+       <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
+ </svg>
+
+
+
 <script language="JavaScript">
     $.get('/progress.json', function(results) {
         var items = results['total_items'];
@@ -130,13 +138,13 @@
 
           </script>
         <br><br>
-        <form action="/add-item/process" method="POST">
+        <form action="/add-item/process" enctype="multipart/form-data" id="private-item-form" method="POST">
           <label>Title**</label>
             <input type="text" name="title" id="title" placeholder="title" required><br><br>
           <label>Tour Link</label>
             <input type="url" name="tour-link" id="tour-link"><br><br>
           <label>Image**</label>
-            <input type="url" name="image" id="image" required><br><br>
+            <input type="file" name="image" id="image" required><br><br>
           <label>Description</label>
             <input type="text" name="description" id="description"><br><br>
             <input id="lat" type="hidden" name="latitude" value="">
