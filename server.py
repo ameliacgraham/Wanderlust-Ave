@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.secret_key = "BANNSALKSIAJAKL"
 app.jinja_env.undefined = StrictUndefined
 
-UPLOAD_FOLDER = '/static/images'
+UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -453,7 +453,7 @@ def process_add_bucket_item():
 
     title = request.form.get('title')
     tour_link = request.form.get('tour-link')
-    image = request.form.get('image')
+    image = request.form.get('image') # possibly request.file
     description = request.form.get('description')
     list_title = request.form.get('list')
     latitude = request.form.get('latitude')
@@ -524,14 +524,32 @@ def allowed_file(filename):
 @app.route('/fileupload', methods=['POST'])
 def upload_file():
     # Check if request has the file part
+    print "Request files: ", request.files
     if 'file' not in request.files:
+        print "No file part"
         flash('No file part')
+        return "No file"
+    file = request.files['file']
     if file.filename == "":
+        print "filename is empty"
         flash("No selected file")
+        return "No selected file"
     if file and allowed_file(file.filename):
+        print "About to upload to s3"
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return redirect(url_for('uploaded_file', filename=filename))
+        # aws_key = AWS_KEY_ID
+        # aws_secret_key = AWS_SECRET_KEY
+
+        # bucket_name = "wanderlist-images"
+        # s3 = boto3.resource('s3')
+        # data = open(filename, 'rb')
+        # s3.Bucket(bucket_name).put_object(Key=filename, Body=data)
+
+        # image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
+
+        # return image_url
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -540,11 +558,10 @@ def uploaded_file(filename):
     aws_key = AWS_KEY_ID
     aws_secret_key = AWS_SECRET_KEY
 
-    filename = file_name
     bucket_name = "wanderlist-images"
     s3 = boto3.resource('s3')
-    data = open(filename, 'rb')
-    s3.Bucket(bucket_name).put_object(Key=filename, Body=data)
+    data = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb')
+    s3.Bucket(bucket_name).put_object(Key=filename, Body=data, ACL='public-read', ContentType='image/jpeg')
 
     image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
 
