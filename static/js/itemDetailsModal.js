@@ -5,16 +5,25 @@ $(document).ready(function() {
         var lon = $(this).data("lon");
         var id = $(this).data("id");
         var tour = $(this).data("tour")
-        var complete = $(this).data("complete");
+        var complete = $(this).data("complete")
+        var country = $(this).data("country")
+        var address = $(this).data("address")
+        var image = $(this).data("image");
+
         $("#details").html(function() {
-        return "<p>" + title + "<br><br>Latitude: " + lat + "<br>Longitude: " +
-         lon + "<br>Tour Link: " + tour + "<br><br><input type='submit' id='edit-button' value='Edit Item'></p>";
+            $("#address-details").text("Address: ");
+            $("#title-details").text("");
+        })
+
+        $("#details").html(function() {
+            $("#address-details").append(address);
+            $("#title-details").append(title);
+            $("#image-details").attr("src",image);
         });
         $("#private-item-details").modal("show");
-    });
-    $("#edit-button").submit(function(evt) {
-        evt.preventDefault();
-        $("private-item-details").modal("hide");
+        $("#edit-button").on("click", function(evt) {
+            $("#private-item-details").modal("hide");
         });
+    });
 });
 

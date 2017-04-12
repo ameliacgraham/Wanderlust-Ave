@@ -518,7 +518,8 @@ def process_add_bucket_item():
         # If there is not a public item with that title, create a public and private item    
         if not item:
             item = PublicItem(title=title,image=image,description=description,
-                                      latitude=latitude, longitude=longitude)
+                                      latitude=latitude, longitude=longitude,
+                                      country=country, address=address)
             db.session.add(item)
             db.session.commit()
         public_id = item.id

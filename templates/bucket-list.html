@@ -54,7 +54,8 @@
         alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}" 
         data-lat="{{ item.public_item.latitude }}" data-lon="{{ item.public_item.longitude }}" 
         data-tour="{{ item.tour_link }}" data-complete="{{ item.checked_off }}"
-        data-title="{{ item.public_item.title }}"><br>
+        data-title="{{ item.public_item.title }}" data-country="{{ item.public_item.country }}"
+        data-address="{{ item.public_item.address }}" data-image="{{ item.public_item.image }}"><br>
 
     {% endfor %}
   {% endif %}
@@ -169,6 +170,10 @@
         <h4 class="modal-title">Details</h4>
       </div>
       <div class="modal-body" id="details">
+        <span id="title-details"></span><br>
+        <img src="" id="image-details" height="350"><br>
+        <span id="address-details">Address: </span><br><br>
+        <input type='submit' id='edit-button' value='Edit Item'>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

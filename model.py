@@ -73,7 +73,6 @@ class BucketList(db.Model):
     user = db.relationship("User",
                             backref=db.backref("bucket_lists",
                                                order_by=email))
-
 class PublicItem(db.Model):
     """Public bucket list items."""
 
@@ -83,6 +82,8 @@ class PublicItem(db.Model):
     title = db.Column(db.String(100), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    country = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
     image = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(300), nullable=True)
     retired = db.Column(db.Boolean, default=False)
@@ -94,10 +95,12 @@ class PublicItem(db.Model):
 
 def example_data():
         """Create example data for the test database."""
-        item1 = PublicItem(title='See The Eiffel Tower', 
+        item1 = PublicItem(title='See the Eiffel Tower', 
                 image='https://s3-us-west-1.amazonaws.com/wanderlist-images/Tour_eiffel_at_sunrise_from_the_trocadero.jpg',
                 latitude=48.858093,
-                longitude=2.294694)
+                longitude=2.294694,
+                country="France",
+                address="Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France")
         db.session.add(item1)
         user = User(first_name="Hackbright",
                     last_name="Academy",
