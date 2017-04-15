@@ -21,7 +21,7 @@ function liquidFillGaugeDefaultSettings(){
         waveRise: true, // Control if the wave should rise from 0 to it's full height, or start at it's full height.
         waveHeightScaling: true, // Controls wave size scaling at low and high fill percentages. When true, wave height reaches it's maximum at 50% fill, and minimum at 0% and 100% fill. This helps to prevent the wave from making the wave circle from appear totally full or empty when near it's minimum or maximum fill.
         waveAnimate: true, // Controls if the wave scrolls or is static.
-        waveColor: "#3fc8ff", // The color of the fill wave.
+        waveColor: "#aaedff", // The color of the fill wave.
         waveOffset: 0, // The amount to initially offset the wave. 0 = no offset. 1 = offset of one full wave.
         textVertPosition: .25, // The height at which to display the percentage text withing the wave circle. 0 = bottom, 1 = top.
         textSize: .57, // The relative height of the text to display in the wave circle. 1 = 50%

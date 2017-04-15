@@ -182,10 +182,17 @@
           <span id="edit-title-details"></span><br>
           <img src="" id="edit-image-details" height="350"><br>
           <span id="edit-address-details">Address: </span><br>
-          Tour Link: <input type="text" id="edit-tour-link-details" name="edit-tour-link" value=""><br>
-          Completed: <input type="checkbox" id="edit-checked-off-details" 
-                          name="edit-checked-off" value="Completed"><br>
-          <input type='submit' id='save-button' value='Save Changes'>
+          <form action="/update-item" id="edit-details-form" name="edit-details-form" method="POST">
+            Tour Link: <input type="text" id="edit-tour-link-details" name="edit-tour-link" value=""><br>
+            Completed: <input type="checkbox" id="edit-checked-off" 
+                            name="edit-checked-off" value="completed"><br>
+            <input type="text" name="edit-item-id" id="edit-item-id" value="" hidden>
+            <input type='submit' id='save-button' value='Save Changes'>
+          </form>
+          <form action="/delete-item" id="delete-form" name="delete-form" method="POST">
+            <input type="text" name="item-id" id="item-id" value="" hidden>
+            <input type="submit" name="delete-button" id="delete-button" value="Delete Item">
+          </form>
         </div>
       </div>
     </div><!-- /.modal-content -->

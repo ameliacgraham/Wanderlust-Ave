@@ -66,9 +66,7 @@ def search_country_items():
     """Queries public items table for items in a country. Returns matches"""
 
     country_name = request.args.get("country-name")
-    form = request.args.get("country-form")
-    print country_name
-    print form
+
     email = session.get('email')
     lists = BucketList.query.filter(BucketList.email==email).all()
 
@@ -422,20 +420,46 @@ def get_progress_of_all_items():
 
 
 
-@app.route('/delete-item', methods=['DELETE'])
+@app.route('/delete-item', methods=['POST'])
 def delete_priv_item():
     """Deletes an item from a user's bucket list."""
 
-    del_item = request.form.get('delete-item')
     item_id = request.form.get('item-id')
-    print del_item
-
-    if del_item == 'delete':
+  
+    if item_id:
         item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
         db.session.delete(item)
         db.session.commit()
 
     return redirect('/')
+
+@app.route('/update-item', methods=['POST'])
+def update_item_details():
+    """Updates a user's bucket item details."""
+
+    email = session.get("email")
+    tour_link = request.form.get("edit-tour-link")
+    print "tour_link: ", tour_link
+    checked_off = request.form.get("edit-checked-off")
+    print "checked-off: ", checked_off
+    item_id = request.form.get("edit-item-id")
+
+    item = PrivateItem.query.get(item_id)
+
+    if tour_link:
+        item.tour_link = tour_link
+
+    if checked_off == "completed":
+        item.checked_off = True
+    else:
+        item.checked_off = False
+    
+    db.session.commit()
+
+    return "Item Updated"
+
+
+
 
 
 # Id of list object instead of title
@@ -623,8 +647,9 @@ def calculate_items_per_country():
 
 @app.route('/d3map')
 def display_d3_map():
-
-    return render_template("index.html")
+    countries = ["Jamaica", "Costa Rica", "France"]
+    return render_template("index.html",
+                           countries=countries)
 
 
 

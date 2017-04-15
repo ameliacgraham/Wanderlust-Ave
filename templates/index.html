@@ -46,6 +46,15 @@ body {
 
 </style>
 
+<form action="/search/country" id="country-dropdown-form" method='GET'>
+  <select name="country-name" id="country-dropdown">
+      {% for country in countries %}
+        <option value="{{ country }}">{{ country }}</option>
+      {% endfor %}
+  </select>
+  <input type="submit" name="country-search-dropdown-button" value="Search">
+</form>
+
 <div id="tooltip-container"></div>
 
 <div id="canvas-svg"></div>

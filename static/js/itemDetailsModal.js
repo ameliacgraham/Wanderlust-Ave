@@ -38,12 +38,21 @@ $(document).ready(function() {
             $("#edit-item-details").show();
         });
         $("#save-button").on("click", function(evt) {
+            evt.preventDefault();
+            $("#edit-item-id").val(id);
+            $("#edit-details-form").submit();
             $("#edit-item-details").hide();
             $("#item-details").show();
+
         $("#private-item-details").on("hidden.bs.modal", function(){
             $("#edit-item-details").hide();
             $("#item-details").show();
             });
+        })
+        $("#delete-button").on("click", function(evt) {
+            evt.preventDefault();
+            $("#item-id").val(id);
+            $("#delete-form").submit();
         })
     });
 });
