@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+<div>
+  {% if item_info %}
+    {{ item_info.title }} <br>
+    <img src="{{ item_info.image }}" alt="Image" width="128" height="128"><br>
+    Latitude: {{ item_info.latitude }}<br>
+    Longitude: {{ item_info.longitude }}
+  {% endif %}
+
+  {% if username %}
+    <form action='/add-item-form'>
+    <input type="submit" name="add" value="Add">
+    </form>
+  {% endif %}
+</div>
+
+
+{% endblock %}

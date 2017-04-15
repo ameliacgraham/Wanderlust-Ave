@@ -15,19 +15,19 @@ function liquidFillGaugeDefaultSettings(){
         circleFillGap: 0.00, // The size of the gap between the outer circle and wave circle as a percentage of the outer circles radius.
         circleColor: "#ffffff", // The color of the outer circle.
         waveHeight: 0.05, // The wave height as a percentage of the radius of the wave circle.
-        waveCount: 1, // The number of full waves per width of the wave circle.
+        waveCount: 3, // The number of full waves per width of the wave circle.
         waveRiseTime: 2000, // The amount of time in milliseconds for the wave to rise from 0 to it's final height.
         waveAnimateTime: 5000, // The amount of time in milliseconds for a full wave to enter the wave circle.
         waveRise: true, // Control if the wave should rise from 0 to it's full height, or start at it's full height.
         waveHeightScaling: true, // Controls wave size scaling at low and high fill percentages. When true, wave height reaches it's maximum at 50% fill, and minimum at 0% and 100% fill. This helps to prevent the wave from making the wave circle from appear totally full or empty when near it's minimum or maximum fill.
         waveAnimate: true, // Controls if the wave scrolls or is static.
-        waveColor: "#0b9db7", // The color of the fill wave.
+        waveColor: "#3fc8ff", // The color of the fill wave.
         waveOffset: 0, // The amount to initially offset the wave. 0 = no offset. 1 = offset of one full wave.
         textVertPosition: .25, // The height at which to display the percentage text withing the wave circle. 0 = bottom, 1 = top.
         textSize: .57, // The relative height of the text to display in the wave circle. 1 = 50%
         valueCountUp: true, // If true, the displayed value counts up from 0 to it's final value upon loading. If false, the final value is displayed.
         displayPercent: true, // If true, a % symbol is displayed after the value.
-        textColor: "#000000", // The color of the value text when the wave does not overlap it.
+        textColor: "#1c1c1c", // The color of the value text when the wave does not overlap it.
         waveTextColor: "#000000" // The color of the value text when the wave overlaps it.
     };
 }
@@ -71,10 +71,10 @@ function loadLiquidFillGauge(elementId, value, config) {
     // Rounding functions so that the correct number of decimal places is always displayed as the value counts up.
     var textRounder = function(value){ return Math.round(value); };
     if(parseFloat(textFinalValue) != parseFloat(textRounder(textFinalValue))){
-        textRounder = function(value){ return parseFloat(value).toFixed(1); };
+        textRounder = function(value){ return parseFloat(value).toFixed(0); };
     }
     if(parseFloat(textFinalValue) != parseFloat(textRounder(textFinalValue))){
-        textRounder = function(value){ return parseFloat(value).toFixed(2); };
+        textRounder = function(value){ return parseFloat(value).toFixed(0); };
     }
 
     // Data for building the clip wave area.

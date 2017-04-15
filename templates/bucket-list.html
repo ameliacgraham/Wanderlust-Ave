@@ -3,7 +3,7 @@
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="/static/js/progressWave.js" language="JavaScript"></script>
 <style>
-    .liquidFillGaugeText { font-family: Times New Roman; font-weight: bold; }
+    .liquidFillGaugeText { font-family: cursive; font-weight: bold; }
 </style>
 {% endblock %}
 
@@ -13,7 +13,7 @@
 
 <button id="create-new-item-button" data-list="{{ bucket_list.title }}">Create a new item</button>
 <p> Progress: {{ progress }} </p>
-<input type="hidden" id="bucket-id" value="{{ b_list }}">
+<input type="hidden" id="bucket-id" value="{{ b_list_id }}">
 
 <svg id="fillgauge" width="97%" height="250" onclick="">
   <pattern id = "globe" height = "100%" width = "100%"            
@@ -55,7 +55,8 @@
         data-lat="{{ item.public_item.latitude }}" data-lon="{{ item.public_item.longitude }}" 
         data-tour="{{ item.tour_link }}" data-complete="{{ item.checked_off }}"
         data-title="{{ item.public_item.title }}" data-country="{{ item.public_item.country }}"
-        data-address="{{ item.public_item.address }}" data-image="{{ item.public_item.image }}"><br>
+        data-address="{{ item.public_item.address }}" data-image="{{ item.public_item.image }}"
+        data-listid="{{ b_list_id }} "><br>
 
     {% endfor %}
   {% endif %}
@@ -111,6 +112,7 @@
               searchBox.addListener('places_changed', function() {
                 var places = searchBox.getPlaces();
                   console.log(places);
+                  debugger;
 
                 if (places.length == 0) {
                   return;
@@ -127,11 +129,10 @@
 
                   document.getElementById('lat').value = latitude;
                   document.getElementById('lon').value = longitude;
-                  document.getElementById('country').value = country;
                   document.getElementById('address').value = address;
+
                   console.log(document.getElementById('lat'));
                   console.log(document.getElementById('lon'));
-                  console.log(document.getElementById('country'));
                   console.log(document.getElementById('address'));
                 });
               });
@@ -150,7 +151,6 @@
             <input type="text" name="description" id="description"><br><br>
             <input id="lat" type="hidden" name="latitude" value="">
             <input id="lon" type="hidden" name="longitude" value="">
-            <input id="country" type="hidden" name="country" value="">
             <input id="address" type="hidden" name="address" value="">
 
             <input type='hidden' name="list" id='list-title'>
@@ -170,10 +170,23 @@
         <h4 class="modal-title">Details</h4>
       </div>
       <div class="modal-body" id="details">
-        <span id="title-details"></span><br>
-        <img src="" id="image-details" height="350"><br>
-        <span id="address-details">Address: </span><br><br>
-        <input type='submit' id='edit-button' value='Edit Item'>
+        <div id="item-details">
+          <span id="title-details"></span><br>
+          <img src="" id="image-details" height="350"><br>
+          <span id="address-details">Address: </span><br>
+          <span id="tour-link-details">Tour Link: </span><br>
+          <span id="completed">Complete: </span><br>
+          <input type='submit' id='edit-button' value='Edit Item'>
+        </div>
+        <div id="edit-item-details" hidden>
+          <span id="edit-title-details"></span><br>
+          <img src="" id="edit-image-details" height="350"><br>
+          <span id="edit-address-details">Address: </span><br>
+          Tour Link: <input type="text" id="edit-tour-link-details" name="edit-tour-link" value=""><br>
+          Completed: <input type="checkbox" id="edit-checked-off-details" 
+                          name="edit-checked-off" value="Completed"><br>
+          <input type='submit' id='save-button' value='Save Changes'>
+        </div>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

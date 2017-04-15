@@ -9,21 +9,42 @@ $(document).ready(function() {
         var country = $(this).data("country")
         var address = $(this).data("address")
         var image = $(this).data("image");
+        var listId = $(this).data("listid");
 
         $("#details").html(function() {
             $("#address-details").text("Address: ");
+            $("#edit-address-details").text("Address: ")
             $("#title-details").text("");
+            $("#edit-title-details").text("");
+            $("#tour-link-details").text("");
+            $("#edit-tour-link-details").text("");
+            $("#completed").text("");
+            $("#edit-checked-off-details").val("");
         })
 
         $("#details").html(function() {
             $("#address-details").append(address);
+            $("#edit-address-details").append(address);
             $("#title-details").append(title);
+            $("#edit-title-details").append(title);
+            $("#edit-tour-link-details").val(tour);
+            $("#completed").append(complete);
             $("#image-details").attr("src",image);
+            $("#edit-image-details").attr("src",image);
         });
         $("#private-item-details").modal("show");
         $("#edit-button").on("click", function(evt) {
-            $("#private-item-details").modal("hide");
+            $("#item-details").hide();
+            $("#edit-item-details").show();
         });
+        $("#save-button").on("click", function(evt) {
+            $("#edit-item-details").hide();
+            $("#item-details").show();
+        $("#private-item-details").on("hidden.bs.modal", function(){
+            $("#edit-item-details").hide();
+            $("#item-details").show();
+            });
+        })
     });
 });
 

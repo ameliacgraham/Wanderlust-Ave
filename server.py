@@ -61,6 +61,25 @@ def process_search_form():
                             email=email,
                             lists=lists)
 
+@app.route('/search/country')
+def search_country_items():
+    """Queries public items table for items in a country. Returns matches"""
+
+    country_name = request.args.get("country-name")
+    form = request.args.get("country-form")
+    print country_name
+    print form
+    email = session.get('email')
+    lists = BucketList.query.filter(BucketList.email==email).all()
+
+    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+    print matched_items
+
+    return render_template("search-results.html",
+                            matched_items=matched_items,
+                            email=email,
+                            lists=lists)
+
 @app.route('/map')
 def display_google_map():
     """Display markers on a map for all public items"""
@@ -446,7 +465,7 @@ def display_bucket_list(list_id):
 
     return render_template("bucket-list.html", 
                            bucket_list=bucket_list,
-                           b_list=b_list_id,
+                           b_list_id=b_list_id,
                            gm_api_key=gm_api_key,
                            places=places,
                            progress=progress)
@@ -506,8 +525,17 @@ def process_add_bucket_item():
         list_title = request.form.get('list')
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
-        country = request.form.get('country')
         address = request.form.get('address')
+        address_components = address.split(",")
+        country = address_components[-1].lstrip()
+        if country == "USA":
+            country = "United States"
+        elif country == "UK":
+            country = "United Kingdom"
+        elif country == "Vietnam":
+            country = "Viet Nam"
+        elif country == "Czechia":
+            country = "Czech Republic"
         print list_title
         print latitude
         print longitude
@@ -571,6 +599,32 @@ def check_off_item():
     db.session.commit()
 
     return redirect('/{}/{}'.format(list_id,item_id))
+
+@app.route('/countries.json')
+def calculate_items_per_country():
+
+    file = open("population.csv")
+    countries = []
+
+    for line in file:
+        data = line.split(",")
+        country = data[1]
+        countries.append(country)
+    file.close()
+
+    country_tallies = []
+    for country in countries:
+        items_count = PublicItem.query.filter(PublicItem.country==country).count()
+        country = {"Country (or dependent territory)": country, 
+                   "Population": items_count}
+        country_tallies.append(country)
+
+    return jsonify(country_tallies)
+
+@app.route('/d3map')
+def display_d3_map():
+
+    return render_template("index.html")
 
 
 
