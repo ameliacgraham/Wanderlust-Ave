@@ -3,12 +3,12 @@
 
 <div>
   {% for flight in flights %}
-      Airport: {{ flight[0] }}<br>
-      Airline: {{ flight[4] }}<br>
-      Flight number: {{ flight[5] }}<br>
-      Price: {{ flight[1] }}<br>
-      Depart At: {{ flight[3] }}<br>
-      Return At: {{ flight[2] }}<br><br><br>
+      Airport: {{ flight[0] }} {{ flight[1] }}<br>
+      Airline: {{ flight[5] }}<br>
+      Flight number: {{ flight[6] }}<br>
+      Price: ${{ flight[2] }}<br>
+      Depart At: {{ flight[4] }}<br>
+      Return At: {{ flight[3] }}<br><br><br>
   {% endfor %}
 </div>
 {% endblock %}
