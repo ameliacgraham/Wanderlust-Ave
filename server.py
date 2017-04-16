@@ -1,16 +1,18 @@
 
 from jinja2 import StrictUndefined
 from flask import Flask, jsonify, render_template, redirect, request, flash, session, url_for, send_from_directory
-from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend
+from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend, Airline, Airport, City, Country
 from werkzeug.utils import secure_filename
 from flask_debugtoolbar import DebugToolbarExtension
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import boto3
 import facebook
 import os
 import requests
 import json
 import bcrypt
+import calendar
+
 
 app = Flask(__name__)
 app.secret_key = "BANNSALKSIAJAKL"
@@ -52,9 +54,10 @@ def process_search_form():
     lists = BucketList.query.filter(BucketList.email==email).all()
 
     for word in keywords:
-        items = PublicItem.query.filter(PublicItem.title.like("%{}%".format(word))).all()
+        items = PublicItem.query.filter(PublicItem.title.ilike("%{}%".format(word))).all()
         for item_object in items:
-            matched_items.append(item_object)
+            if item_object not in matched_items:
+                matched_items.append(item_object)
 
     return render_template('search-results.html', 
                             matched_items=matched_items,
@@ -101,28 +104,69 @@ def display_google_map():
 @app.route('/flight-search')
 def display_flight_form():
 
-    return render_template("flight-search.html")
+    today = datetime.today()
+    months = []
+
+    if today.day < calendar.monthrange(today.year, today.month)[1] / 2:
+        months.append(today)
+
+    while len(months) < 12:
+        days_in_month = calendar.monthrange(today.year, today.month)[1]
+        month = today + timedelta(days=days_in_month)
+        months.append(month)
+        today = month
+
+    month_names = []
+    for month in months:
+        m, y = month.month, month.year
+        m = calendar.month_name[m]
+        month_names.append(m + " " + str(y))
+
+    return render_template("flight-search.html",
+                            months=month_names)
 
 @app.route('/flight-results')
 def display_flight_results():
 
     origin = request.args.get('origin')
-    destination = request.args.get('destination')
-    depart_date = request.args.get('depart-at')
-    return_date = request.args.get('return-at')
-    time = datetime.now()
-    year = time.year
+    print origin
+    destination = "-"
+    depart_month_info = request.args.get('depart-at').split()
+    print depart_month_info
+    depart_month = depart_month_info[0]
+    if depart_month == "January":
+        depart_month = 1
+    elif depart_month == "February":
+        depart_month = 2
+    elif depart_month == "March":
+        depart_month = 3
+    elif depart_month == "April":
+        depart_month = 4
+    elif depart_month == "May":
+        depart_month = 5
+    elif depart_month == "June":
+        depart_month = 6
+    elif depart_month == "July":
+        depart_month = 7
+    elif depart_month == "August":
+        depart_month = 8
+    elif depart_month == "September":
+        depart_month = 9
+    elif depart_month == "October":
+        depart_month = 10
+    elif depart_month == "November":
+        depart_month = 11
+    elif depart_month == "December":
+        depart_month = 12
+    depart_year = depart_month_info[1]
+    print depart_year
 
     url = ("http://api.travelpayouts.com/v1/prices/cheap?origin={}"
-                "&depart_date={}-{}&currency=USD&token={}").format(origin,
-                                                                   year,
-                                                                   depart_date,
+                "&depart_date={}-{}&currency=USD&destination={}&token={}").format(origin,
+                                                                   depart_year,
+                                                                   depart_month,
+                                                                   destination,
                                                                    travel_payouts_api)
-    if destination != "-":
-        url += "&destination={}".format(destination)
-
-    if return_date != "":
-        url += "&return_date={}-{}".format(year, return_date)
 
     print url
     r = requests.get(url)
@@ -131,22 +175,30 @@ def display_flight_results():
 
     flights = []
 
-    for airport in flight_results['data']:
-        number = str(flight_results['data'][airport].keys()[0])
-        price = str(flight_results['data'][airport][number]['price'])
-        return_at = str(flight_results['data'][airport][number]['return_at'])
+    for airport_code in flight_results['data']:
+        number = str(flight_results['data'][airport_code].keys()[0])
+        price = str(flight_results['data'][airport_code][number]['price'])
+        return_at = str(flight_results['data'][airport_code][number]['return_at'])
         # TODO: Clean up variable names
         return_at = return_at.replace("T", " ").replace("Z", "")
         return_at = datetime.strptime(return_at, "%Y-%m-%d %H:%M:%S")
         return_at = return_at.strftime("%A, %B %d, %Y, %I:%M %p")
-        departure_at = str(flight_results['data'][airport][number]['departure_at'])
+        departure_at = str(flight_results['data'][airport_code][number]['departure_at'])
         departure_at = departure_at.replace("T", " ").replace("Z", "")
         departure_at = datetime.strptime(departure_at, "%Y-%m-%d %H:%M:%S")
         departure_at = departure_at.strftime("%A, %B %d, %Y, %I:%M %p")
-        airline = str(flight_results['data'][airport][number]['airline'])
-        flight_number = str(flight_results['data'][airport][number]['flight_number'])
+        airline_code = flight_results['data'][airport_code][number]['airline'].encode('UTF-8')
+        airline = Airline.query.filter(Airline.code==airline_code).first()
+        airline_name = airline.name
+        flight_number = str(flight_results['data'][airport_code][number]['flight_number'])
+        airport = Airport.query.filter(Airport.code==airport_code).first()
+        if airport:
+            airport_name = airport.name
+            flights.append([airport_code, airport_name, price, return_at, departure_at, airline_name, flight_number])
 
-        flights.append([airport, price, return_at, departure_at, airline, flight_number])
+        else:
+            airport_name = ""
+            flights.append([airport_code, airport_name, price, return_at, departure_at, airline_name, flight_number])
 
     return render_template('flight-results.html', flights=flights)
 
@@ -458,10 +510,6 @@ def update_item_details():
 
     return "Item Updated"
 
-
-
-
-
 # Id of list object instead of title
 @app.route('/my-lists/<list_id>')
 def display_bucket_list(list_id):
@@ -647,9 +695,19 @@ def calculate_items_per_country():
 
 @app.route('/d3map')
 def display_d3_map():
-    countries = ["Jamaica", "Costa Rica", "France"]
+    countries = Country.query.all()
+    country_names = []
+    for country in countries:
+        country_names.append(country.name)
+
+    sorted_countries = sorted(country_names)
+    print sorted_countries
+
+
     return render_template("index.html",
-                           countries=countries)
+                           countries=sorted_countries)
+
+    
 
 
 
