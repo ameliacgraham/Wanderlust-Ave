@@ -177,6 +177,74 @@ class Friend(db.Model):
 
         return "<Friend id: {} user: {} fb_friend: {}>".format(self.id, self.user, self.fb_friend)
 
+class Country(db.Model):
+    """Information about countries."""
+
+    __tablename__ = "countries"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    code = db.Column(db.String(5), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<Country id: {} code: {} name: {}>".format(self.id, self.code, self.name)
+
+class City(db.Model):
+    """Information about cities."""
+
+    __tablename__ = "cities"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    name = db.Column(db.String(100), nullable=False)
+    code = db.Column(db.String(10), nullable=False)
+
+    country = db.relationship("Country",
+                                    backref=db.backref("cities",
+                                                order_by=country_id))
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<City id: {} country_id: {} name: {}>".format(self.id, self.country_id, self.name)
+
+class Airport(db.Model):
+    """Information about airports."""
+
+    __tablename__ = "airports"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=True)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=True)
+    code = db.Column(db.String(5), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<Airport id: {} code: {} name: {}>".format(self.id, self.code, self.name)
+
+class Airline(db.Model):
+    """Information about airlines."""
+
+    __tablename__ = "airlines"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    code = db.Column(db.String(5), nullable=False)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<Airline id: {} code: {} name: {}>".format(self.id, self.code, self.name)
+
+
+
+
 def connect_to_db(app, db_uri="postgresql:///wander_list"):
     """Connect the database to our Flask app."""
 
