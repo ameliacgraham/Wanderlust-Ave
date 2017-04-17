@@ -4,26 +4,22 @@ from flask import Flask, jsonify, render_template, redirect, request, flash, ses
 from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, Journal, Friend, Airline, Airport, City, Country
 from werkzeug.utils import secure_filename
 from flask_debugtoolbar import DebugToolbarExtension
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
+from StringIO import StringIO
 import boto3
 import facebook
 import os
 import requests
 import json
 import bcrypt
-import calendar
 
 
 app = Flask(__name__)
 app.secret_key = "BANNSALKSIAJAKL"
 app.jinja_env.undefined = StrictUndefined
-
-UPLOAD_FOLDER = 'static/images'
-ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Max photo size is 16 mb
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 gm_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 travel_payouts_api = os.environ['TRAVEL_PAYOUTS_API']
@@ -42,166 +38,6 @@ def display_homepage():
                            public_items=public_items,
                            lists=lists,
                            email=email)
-
-@app.route('/search')
-def process_search_form():
-    """Processes a search form."""
-
-    form_input = request.args.get('public-search')
-    keywords = form_input.split()
-    matched_items = []
-    email = session.get('email')
-    lists = BucketList.query.filter(BucketList.email==email).all()
-
-    for word in keywords:
-        items = PublicItem.query.filter(PublicItem.title.ilike("%{}%".format(word))).all()
-        for item_object in items:
-            if item_object not in matched_items:
-                matched_items.append(item_object)
-
-    return render_template('search-results.html', 
-                            matched_items=matched_items,
-                            email=email,
-                            lists=lists)
-
-@app.route('/search/country')
-def search_country_items():
-    """Queries public items table for items in a country. Returns matches"""
-
-    country_name = request.args.get("country-name")
-
-    email = session.get('email')
-    lists = BucketList.query.filter(BucketList.email==email).all()
-
-    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
-    print matched_items
-
-    return render_template("search-results.html",
-                            matched_items=matched_items,
-                            email=email,
-                            lists=lists)
-
-@app.route('/map')
-def display_google_map():
-    """Display markers on a map for all public items"""
-
-    items = PublicItem.query.all()
-    places = []
-
-    for item in items:
-        item_coordinates = [item.title, item.latitude,
-                            item.longitude]
-        places.append(item_coordinates)
-    
-    # change back to UTF-8
-    for location in places:
-        location[0] = str(location[0])
-
-    return render_template("public-items-map.html",
-                           gm_api_key=gm_api_key,
-                           places=places)
-
-@app.route('/flight-search')
-def display_flight_form():
-
-    today = datetime.today()
-    months = []
-
-    if today.day < calendar.monthrange(today.year, today.month)[1] / 2:
-        months.append(today)
-
-    while len(months) < 12:
-        days_in_month = calendar.monthrange(today.year, today.month)[1]
-        month = today + timedelta(days=days_in_month)
-        months.append(month)
-        today = month
-
-    month_names = []
-    for month in months:
-        m, y = month.month, month.year
-        m = calendar.month_name[m]
-        month_names.append(m + " " + str(y))
-
-    return render_template("flight-search.html",
-                            months=month_names)
-
-@app.route('/flight-results')
-def display_flight_results():
-
-    origin = request.args.get('origin')
-    print origin
-    destination = "-"
-    depart_month_info = request.args.get('depart-at').split()
-    print depart_month_info
-    depart_month = depart_month_info[0]
-    if depart_month == "January":
-        depart_month = 1
-    elif depart_month == "February":
-        depart_month = 2
-    elif depart_month == "March":
-        depart_month = 3
-    elif depart_month == "April":
-        depart_month = 4
-    elif depart_month == "May":
-        depart_month = 5
-    elif depart_month == "June":
-        depart_month = 6
-    elif depart_month == "July":
-        depart_month = 7
-    elif depart_month == "August":
-        depart_month = 8
-    elif depart_month == "September":
-        depart_month = 9
-    elif depart_month == "October":
-        depart_month = 10
-    elif depart_month == "November":
-        depart_month = 11
-    elif depart_month == "December":
-        depart_month = 12
-    depart_year = depart_month_info[1]
-    print depart_year
-
-    url = ("http://api.travelpayouts.com/v1/prices/cheap?origin={}"
-                "&depart_date={}-{}&currency=USD&destination={}&token={}").format(origin,
-                                                                   depart_year,
-                                                                   depart_month,
-                                                                   destination,
-                                                                   travel_payouts_api)
-
-    print url
-    r = requests.get(url)
-    data = r.text
-    flight_results = json.loads(data)
-
-    flights = []
-
-    for airport_code in flight_results['data']:
-        number = str(flight_results['data'][airport_code].keys()[0])
-        price = str(flight_results['data'][airport_code][number]['price'])
-        return_at = str(flight_results['data'][airport_code][number]['return_at'])
-        # TODO: Clean up variable names
-        return_at = return_at.replace("T", " ").replace("Z", "")
-        return_at = datetime.strptime(return_at, "%Y-%m-%d %H:%M:%S")
-        return_at = return_at.strftime("%A, %B %d, %Y, %I:%M %p")
-        departure_at = str(flight_results['data'][airport_code][number]['departure_at'])
-        departure_at = departure_at.replace("T", " ").replace("Z", "")
-        departure_at = datetime.strptime(departure_at, "%Y-%m-%d %H:%M:%S")
-        departure_at = departure_at.strftime("%A, %B %d, %Y, %I:%M %p")
-        airline_code = flight_results['data'][airport_code][number]['airline'].encode('UTF-8')
-        airline = Airline.query.filter(Airline.code==airline_code).first()
-        airline_name = airline.name
-        flight_number = str(flight_results['data'][airport_code][number]['flight_number'])
-        airport = Airport.query.filter(Airport.code==airport_code).first()
-        if airport:
-            airport_name = airport.name
-            flights.append([airport_code, airport_name, price, return_at, departure_at, airline_name, flight_number])
-
-        else:
-            airport_name = ""
-            flights.append([airport_code, airport_name, price, return_at, departure_at, airline_name, flight_number])
-
-    return render_template('flight-results.html', flights=flights)
-
 
 @app.route('/register', methods=['POST'])
 def process_registation_form():
@@ -225,7 +61,6 @@ def process_registation_form():
         db.session.commit()
     return redirect("/")
 
-
 @app.route('/login', methods=['POST'])
 def process_login_info():
     """Checks if user email and password exist on same account, then logs in or redirects."""
@@ -245,17 +80,6 @@ def process_login_info():
         return redirect("/my-lists")
     else:
         return "Email or Password is incorrect. Please try again!"
-
-@app.route('/logout')
-def log_user_out():
-    """Logs a user out."""
-
-    del session['username']
-    del session['email']
-    del session['token']
-    public_items = PublicItem.query.all()
-    flash("You have successfully logged out!")
-    return redirect("/")
 
 @app.route('/facebook', methods=['POST'])
 def check_for_user():
@@ -280,23 +104,17 @@ def check_for_user():
     else:
         # pop up window asking for password
         # add user to database
-        print "need email"
         return "need email"
 
 @app.route('/facebook/login', methods=['POST'])
 def login_user():
 
     new = request.form.get('new')
-    print "in Facebook login"
 
-
-    print "New: " + new
     # if new user
     if new == "true":
-        print "Got to new user"
         email = request.form.get('email')
         password = request.form.get('id')
-        print password
         username = request.form.get('username')
         name = request.form.get('name')
         first_name, last_name = name.split()
@@ -317,7 +135,6 @@ def login_user():
         email = request.form.get('email')
         username = request.form.get('username')
         user = User.query.filter(User.email==email).first()
-        print "Find user"
 
     session["username"] = username
     session["email"] = email
@@ -349,9 +166,41 @@ def login_user():
 
     return redirect('/')
 
+@app.route('/logout')
+def log_user_out():
+    """Logs a user out."""
+
+    del session['username']
+    del session['email']
+    del session['token']
+    public_items = PublicItem.query.all()
+    flash("You have successfully logged out!")
+    return redirect("/")
+
+
+@app.route('/profile/user')
+def display_user_profile():
+    """Display information about the user"""
+
+    email = session.get('email')
+    if email:
+        country_tallies = {}
+        user = User.query.get(email)
+        private_items = PrivateItem.query.filter(email==email).all()
+        for item in private_items:
+            country = str(item.public_item.country)
+            country_tallies[country] = country_tallies.get(country, 0) + 1
+            print country_tallies
+
+    
+    sorted_tallies = sorted(country_tallies.items(), key=operator.itemgetter(1))
+
+    return sorted_tallies[-1]
+
 @app.route('/profile/<facebook_id>')
 def display_profile(facebook_id):
     """Displays a user's profile page"""
+
     user = User.query.filter(User.facebook_id==facebook_id).one()
     email = session['email']
     user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
@@ -439,77 +288,6 @@ def display_bucket_lists():
     # flash("You already have a list named {}".format(title))
     return "Duplicate List"
 
-
-@app.route('/progress.json')
-def get_progress_of_all_items():
-    email = str(session.get("email"))
-    all_items = request.args.get("all_items")
-    b_list_id = request.args.get("list_id")
-    if email:
-        if all_items == "True":
-            user = User.query.get(email)
-            progress_results = user.get_progress()
-            return jsonify(progress_results)
-        else:
-            bucket_list = BucketList.query.filter(BucketList.id==b_list_id).first()
-
-            all_list_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id).count()
-            checked_off_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id, PrivateItem.checked_off==True).count()
-            if all_list_items == 0:
-                progress_results = {"checked_off_items": 0,
-                                    "all_list_items": 0,
-                                    "percentage_complete": 0}
-                return jsonify(progress_results)
-
-            else:
-                progress = str(checked_off_items) + "/" + str(all_list_items)
-                percentage_complete = (float(checked_off_items)/all_list_items) * 100
-                progress_results = {"checked_off_items": checked_off_items,
-                                    "all_list_items": all_list_items,
-                                    "percentage_complete": percentage_complete}
-                return jsonify(progress_results)
-
-
-
-
-@app.route('/delete-item', methods=['POST'])
-def delete_priv_item():
-    """Deletes an item from a user's bucket list."""
-
-    item_id = request.form.get('item-id')
-  
-    if item_id:
-        item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
-        db.session.delete(item)
-        db.session.commit()
-
-    return redirect('/')
-
-@app.route('/update-item', methods=['POST'])
-def update_item_details():
-    """Updates a user's bucket item details."""
-
-    email = session.get("email")
-    tour_link = request.form.get("edit-tour-link")
-    print "tour_link: ", tour_link
-    checked_off = request.form.get("edit-checked-off")
-    print "checked-off: ", checked_off
-    item_id = request.form.get("edit-item-id")
-
-    item = PrivateItem.query.get(item_id)
-
-    if tour_link:
-        item.tour_link = tour_link
-
-    if checked_off == "completed":
-        item.checked_off = True
-    else:
-        item.checked_off = False
-    
-    db.session.commit()
-
-    return "Item Updated"
-
 # Id of list object instead of title
 @app.route('/my-lists/<list_id>')
 def display_bucket_list(list_id):
@@ -542,22 +320,39 @@ def display_bucket_list(list_id):
                            places=places,
                            progress=progress)
 
-@app.route('/add-item/public', methods=['POST'])
-def add_item_from_public():
-    email = session['email']
-    public_id = request.form.get('id')
-    list_title = request.form.get('title')
-    print list_title
-    bucket_list = BucketList.query.filter(BucketList.title==list_title,
-                                          BucketList.email==email).first()
-    bucket_list_id = bucket_list.id
-    print "About to print list_id"
-    print bucket_list_id
-    tour_link = None
-    private_item = create_private_item(public_id, bucket_list_id, tour_link)
-    print private_item
-    return "Item added"
 
+@app.route('/progress.json')
+def get_progress_of_all_items():
+    email = str(session.get("email"))
+    all_items = request.args.get("all_items")
+    b_list_id = request.args.get("list_id")
+    if email:
+        if all_items == "True":
+            user = User.query.get(email)
+            progress_results = user.get_progress()
+            return jsonify(progress_results)
+        else:
+            bucket_list = BucketList.query.filter(BucketList.id==b_list_id).first()
+
+            all_list_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id).count()
+            checked_off_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id, PrivateItem.checked_off==True).count()
+            if all_list_items == 0:
+                progress_results = {"checked_off_items": 0,
+                                    "all_list_items": 0,
+                                    "percentage_complete": 0}
+                return jsonify(progress_results)
+
+            else:
+                progress = str(checked_off_items) + "/" + str(all_list_items)
+                percentage_complete = (float(checked_off_items)/all_list_items) * 100
+                progress_results = {"checked_off_items": checked_off_items,
+                                    "all_list_items": all_list_items,
+                                    "percentage_complete": percentage_complete}
+                return jsonify(progress_results)
+
+def allowed_file(filename):
+    return ("." in filename and filename.rsplit('.', 1)[1].lower() 
+            in ALLOWED_EXTENSIONS)
 
 @app.route('/add-item/process', methods=['POST'])
 def process_add_bucket_item():
@@ -576,16 +371,16 @@ def process_add_bucket_item():
     if file and allowed_file(file.filename):
         print "About to upload to s3"
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        uploaded_file = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        fp = StringIO()
+        file.save(fp)
+        fp.seek(0)
 
         aws_key = AWS_KEY_ID
         aws_secret_key = AWS_SECRET_KEY
 
         bucket_name = "wanderlist-images"
-        s3 = boto3.resource('s3')
-        data = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb')
-        s3.Bucket(bucket_name).put_object(Key=filename, Body=data, ACL='public-read', ContentType='image/jpeg')
+        s3 = boto3.client('s3')
+        response = s3.put_object(Bucket=bucket_name, Key=filename, Body=fp, ACL='public-read', ContentType='image/jpeg')
 
         image_url = "https://s3-us-west-1.amazonaws.com/{}/{}".format(bucket_name, filename)
             
@@ -628,12 +423,6 @@ def process_add_bucket_item():
         create_private_item(public_id, b_list_id, tour_link)
         return redirect('/my-lists/{}'.format(b_list_id))
 
-def allowed_file(filename):
-    return ("." in filename and filename.rsplit('.', 1)[1].lower() 
-            in ALLOWED_EXTENSIONS)
-
-
-
 def create_private_item(public_id, list_id, tour_link):
     email = session['email']
     print public_id
@@ -658,6 +447,57 @@ def create_private_item(public_id, list_id, tour_link):
     db.session.commit()
     return "Item added"
 
+@app.route('/add-item/public', methods=['POST'])
+def add_item_from_public():
+    email = session['email']
+    public_id = request.form.get('id')
+    list_title = request.form.get('title')
+    print list_title
+    bucket_list = BucketList.query.filter(BucketList.title==list_title,
+                                          BucketList.email==email).first()
+    bucket_list_id = bucket_list.id
+    print "About to print list_id"
+    print bucket_list_id
+    tour_link = None
+    private_item = create_private_item(public_id, bucket_list_id, tour_link)
+    print private_item
+    return "Item added"
+
+@app.route('/delete-item', methods=['POST'])
+def delete_priv_item():
+    """Deletes an item from a user's bucket list."""
+
+    item_id = request.form.get('item-id')
+  
+    if item_id:
+        item = PrivateItem.query.filter(PrivateItem.id==item_id).one()
+        db.session.delete(item)
+        db.session.commit()
+
+    return redirect('/')
+
+@app.route('/update-item', methods=['POST'])
+def update_item_details():
+    """Updates a user's bucket item details."""
+
+    email = session.get("email")
+    tour_link = request.form.get("edit-tour-link")
+    checked_off = request.form.get("edit-checked-off")
+    item_id = request.form.get("edit-item-id")
+
+    item = PrivateItem.query.get(item_id)
+
+    if tour_link:
+        item.tour_link = tour_link
+
+    if checked_off == "completed":
+        item.checked_off = True
+    else:
+        item.checked_off = False
+    
+    db.session.commit()
+
+    return "Item Updated"
 
 @app.route('/check-off-item', methods=['POST'])
 def check_off_item():
@@ -671,6 +511,44 @@ def check_off_item():
     db.session.commit()
 
     return redirect('/{}/{}'.format(list_id,item_id))
+
+
+@app.route('/search')
+def process_search_form():
+    """Processes a search form."""
+
+    form_input = request.args.get('public-search')
+    keywords = form_input.split()
+    matched_items = []
+    email = session.get('email')
+    lists = BucketList.query.filter(BucketList.email==email).all()
+
+    for word in keywords:
+        items = PublicItem.query.filter(PublicItem.title.ilike("%{}%".format(word))).all()
+        for item_object in items:
+            if item_object not in matched_items:
+                matched_items.append(item_object)
+
+    return render_template('search-results.html', 
+                            matched_items=matched_items,
+                            email=email,
+                            lists=lists)
+
+@app.route('/search/country')
+def search_country_items():
+    """Queries public items table for items in a country. Returns matches"""
+
+    country_name = request.args.get("country-name")
+
+    email = session.get('email')
+    lists = BucketList.query.filter(BucketList.email==email).all()
+
+    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+
+    return render_template("search-results.html",
+                            matched_items=matched_items,
+                            email=email,
+                            lists=lists)
 
 @app.route('/countries.json')
 def calculate_items_per_country():
@@ -707,8 +585,25 @@ def display_d3_map():
     return render_template("index.html",
                            countries=sorted_countries)
 
-    
+@app.route('/map')
+def display_google_map():
+    """Display markers on a map for all public items"""
 
+    items = PublicItem.query.all()
+    places = []
+
+    for item in items:
+        item_coordinates = [item.title, item.latitude,
+                            item.longitude]
+        places.append(item_coordinates)
+    
+    # change back to UTF-8
+    for location in places:
+        location[0] = str(location[0])
+
+    return render_template("public-items-map.html",
+                           gm_api_key=gm_api_key,
+                           places=places)
 
 
 if __name__ == "__main__":
