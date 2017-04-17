@@ -12,6 +12,7 @@ import os
 import requests
 import json
 import bcrypt
+import operator
 
 
 app = Flask(__name__)
@@ -178,24 +179,40 @@ def log_user_out():
     return redirect("/")
 
 
-@app.route('/profile/user')
-def display_user_profile():
-    """Display information about the user"""
-
+@app.route('/country-tallies.json')
+def get_country_tallies_for_user_items():
+    """Get tallies for items per country."""
     email = session.get('email')
     if email:
+        countries = []
         country_tallies = {}
         user = User.query.get(email)
         private_items = PrivateItem.query.filter(email==email).all()
         for item in private_items:
-            country = str(item.public_item.country)
-            country_tallies[country] = country_tallies.get(country, 0) + 1
-            print country_tallies
+            if item.checked_off is False:
+                country_name = item.public_item.country
+                country_tallies[country_name] = country_tallies.get(country_name, 0) + 1
+        for key, value in country_tallies.iteritems():
+            country = {"country": key, "num_of_items": value}
+            countries.append(country)
 
-    
-    sorted_tallies = sorted(country_tallies.items(), key=operator.itemgetter(1))
+    max_country = sorted(country_tallies.items(), key=operator.itemgetter(1))[-1]
 
-    return sorted_tallies[-1]
+    # results = {"countries": countries,
+    #             "max_country": max_country}
+
+    results = countries
+    return jsonify(results)
+
+
+@app.route('/profile-user')
+def display_user_profile():
+    """Display information about the user"""
+
+    email = session.get('email')
+    return render_template("user-profile.html",
+                            email=email)
+
 
 @app.route('/profile/<facebook_id>')
 def display_profile(facebook_id):
@@ -219,7 +236,6 @@ def display_fb_friends():
     user = User.query.get(email)
     # list of user objects for friends
     friends = user.followers
-    token = session['token']
 
     return render_template("facebook-friends.html",
                             friends=friends,
@@ -552,6 +568,27 @@ def search_country_items():
                             matched_items=matched_items,
                             email=email,
                             lists=lists)
+
+@app.route('/search/country/user-items')
+def search_items_by_country_per_user():
+    """Gets all private items of a user for a specific country."""
+
+    country = request.args.get("country-name-user")
+    email = session.get('email')
+    bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+
+    matched_items = []
+
+    for bucket_list in bucket_lists:
+        for bucket_item in bucket_list.priv_items:
+            if bucket_item.public_item.country == country:
+                matched_items.append(bucket_item)
+
+    return render_template("private-search.html",
+                            matched_items=matched_items,
+                            email=email,
+                            lists=bucket_lists)
+
 
 @app.route('/countries.json')
 def calculate_items_per_country():

@@ -2,6 +2,7 @@ import unittest
 
 from server import app
 from model import db, example_data, connect_to_db
+from selenium import webdriver
 
 
 class BucketTests(unittest.TestCase):
@@ -10,6 +11,9 @@ class BucketTests(unittest.TestCase):
     def setUp(self):
         self.client = app.test_client()
         app.config['TESTING'] = True
+        chromedriver = "/Users/ameliacgreen/Downloads/chromedriver"
+        os.environ["webdriver.chrome.driver"] = chromedriver
+        driver = webdriver.Chrome(chromedriver)
 
     def test_homepage(self):
         result = self.client.get("/")
@@ -54,6 +58,12 @@ class BucketTests(unittest.TestCase):
         self.assertIn("Create a new list", result.data)
 
     ### second test login with different get results
+
+    def test_mylists(self):
+        self.browser.get('http://localhost:5000/')
+
+        my_lists = self.browser.find_element_by_id('my-lists')
+        my_lists.click()
     
 
 
