@@ -222,7 +222,8 @@ def display_fb_friends():
     token = session['token']
 
     return render_template("facebook-friends.html",
-                            friends=friends)
+                            friends=friends,
+                            email=email)
 
 @app.route('/facebook/post', methods=['POST'])
 def post_completed_bucket_item():
@@ -293,6 +294,7 @@ def display_bucket_lists():
 def display_bucket_list(list_id):
     """Displays a user's bucket list."""
 
+    email = session.get("email")
     bucket_list = BucketList.query.filter(BucketList.id==list_id).first()
     b_list_id = list_id
 
@@ -318,7 +320,8 @@ def display_bucket_list(list_id):
                            b_list_id=b_list_id,
                            gm_api_key=gm_api_key,
                            places=places,
-                           progress=progress)
+                           progress=progress,
+                           email=email)
 
 
 @app.route('/progress.json')
@@ -573,6 +576,7 @@ def calculate_items_per_country():
 
 @app.route('/d3map')
 def display_d3_map():
+    email = session.get("email")
     countries = Country.query.all()
     country_names = []
     for country in countries:
@@ -583,12 +587,14 @@ def display_d3_map():
 
 
     return render_template("index.html",
-                           countries=sorted_countries)
+                           countries=sorted_countries,
+                           email=email)
 
 @app.route('/map')
 def display_google_map():
     """Display markers on a map for all public items"""
 
+    email = session.get("email")
     items = PublicItem.query.all()
     places = []
 
@@ -603,7 +609,8 @@ def display_google_map():
 
     return render_template("public-items-map.html",
                            gm_api_key=gm_api_key,
-                           places=places)
+                           places=places,
+                           email=email)
 
 
 if __name__ == "__main__":

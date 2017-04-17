@@ -9,7 +9,23 @@
   {% block head %} heading goes here {% endblock %}
 </head>
 <body>
-  Welcome to WanderList
+{% if email %}
+  Hi {{ email }}!
+  <p><a href="/my-lists">My Lists</a></p>
+  <button id="logout-button">Logout</button>
+{% endif %}
+
+{% if not email %}
+  <button id="register-button">Register</button>
+  <fb:login-button scope="public_profile,email,user_friends" onlogin="checkLoginState();">
+  </fb:login-button><br>
+  <button id="login-button">Login</button>
+{% endif %}
+  <p><a href="/map">Map</a></p>
+<form action="/search">
+  <input type="search" name="public-search" placeholder="search">
+  <input type="submit" value="Search"><br><br>
+</form>
   <ul>
     {% for message in get_flashed_messages() %}
       <li>{{ message }}</li>
