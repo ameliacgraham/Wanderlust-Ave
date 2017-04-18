@@ -181,28 +181,95 @@ def log_user_out():
 
 @app.route('/country-tallies.json')
 def get_country_tallies_for_user_items():
-    """Get tallies for items per country."""
+    """Get tallies for items per country per user."""
     email = session.get('email')
     if email:
         countries = []
         country_tallies = {}
-        user = User.query.get(email)
-        private_items = PrivateItem.query.filter(email==email).all()
-        for item in private_items:
-            if item.checked_off is False:
-                country_name = item.public_item.country
-                country_tallies[country_name] = country_tallies.get(country_name, 0) + 1
-        for key, value in country_tallies.iteritems():
-            country = {"country": key, "num_of_items": value}
+        bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+        for bucket_list in bucket_lists:
+            bucket_items = bucket_list.priv_items
+            for item in bucket_items:
+                if item.checked_off is False:
+                    country_name = item.public_item.country
+                    country_tallies[country_name] = country_tallies.get(country_name, 0) + 1
+        for country, tally in country_tallies.items():
+            country = {"country": country, "num_of_items": tally}
             countries.append(country)
 
     max_country = sorted(country_tallies.items(), key=operator.itemgetter(1))[-1]
 
-    # results = {"countries": countries,
-    #             "max_country": max_country}
+    results = {"countries": countries,
+                "max_country": max_country}
 
-    results = countries
+    print country_tallies.items()
+    print countries
+    print max_country
+    # results = countries
     return jsonify(results)
+
+@app.route('/friend-tallies.json')
+def get_num_of_common_items_per_friend():
+
+    email = session.get('email')
+    if email:
+
+        user = User.query.get(email)
+        user_items = set([])
+        user_bucket_lists = user.bucket_lists
+        for bucket_list in user_bucket_lists:
+            user_bucket_items = bucket_list.priv_items
+            for bucket_item in user_bucket_items:
+                public_item = bucket_item.public_item_id
+                user_items.add(public_item)
+
+        # list of user objects for friends
+        friends = user.followers
+
+        counts = []
+        common_items_count = {}
+        for friend in friends:
+            name = friend.first_name + " " + friend.last_name
+            friend_items = set([])
+            friend_email = friend.email
+            friend_buckets = friend.bucket_lists
+            for bucket_list in friend_buckets:
+                bucket_items = bucket_list.priv_items
+                for item in bucket_items:
+                    friend_items.add(item.public_item_id)
+            common_items = len(user_items & friend_items)
+            common_items_count[name] = [common_items, friend_email]
+        for key, value in common_items_count.iteritems():
+            items_tally = {"name": key, "common_items": value[0], "id": value[1]}
+            counts.append(items_tally)
+
+        max_friend = sorted(common_items_count.items(), key=operator.itemgetter(1))[-1]
+
+        results = {"items_tally": counts,
+                   "max_friend": max_friend}
+
+    return jsonify(results)
+
+@app.route('/friend-tallies-subqueries')
+def friend_items_subqueries():
+    email = session.get('email')
+    user = User.query.get(email)
+
+    user_items = db.session.query(BucketList.id).filter_by(email=email).subquery()
+
+    friends = user.followers
+
+    counts = []
+    common_items_count = {}
+    for friend in friends:
+        name = friend.first_name + " " + friend.last_name
+        friend_email = friend.email
+        friend_items = db.session.query(BucketList.id).filter_by(email=friend_email).subquery()
+
+        total = db.session.query(PrivateItem.public_item_id).filter(PrivateItem.list_id.in_(friend_items)).count()
+        common_items_count[name] = total
+
+    return jsonify(common_items_count)
 
 
 @app.route('/profile-user')
@@ -213,16 +280,34 @@ def display_user_profile():
     return render_template("user-profile.html",
                             email=email)
 
+@app.route('/facebook-email', methods=['POST'])
+def get_facebook_id_from_form():
+
+    email = request.form.get('friend-email')
+    friend_user = User.query.get(email)
+    friend_facebook_id = friend_user.facebook_id
+
+    return redirect("/profile/{}".format(friend_facebook_id))
+
+
 
 @app.route('/profile/<facebook_id>')
 def display_profile(facebook_id):
     """Displays a user's profile page"""
 
-    user = User.query.filter(User.facebook_id==facebook_id).one()
+    friend_email = request.args.get('friend-email')
     email = session['email']
-    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
-    private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
+    if friend_email:
+
+        user = User.query.filter(User.email==friend_email).one()
+        private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
                     .filter(User.email==user.email).all())
+    else:
+        user = User.query.filter(User.facebook_id==facebook_id).one()
+        private_items = (db.session.query(PrivateItem).join(BucketList).join(User)
+                    .filter(User.email==user.email).all())
+    user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
+
     return render_template('profile.html',
                             user=user,
                             private_items=private_items,
