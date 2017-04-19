@@ -15,6 +15,9 @@
 <p> Progress: {{ progress }} </p>
 <input type="hidden" id="bucket-id" value="{{ b_list_id }}">
 
+<button id="map-view">Map View</button>
+<button id="list-view" hidden>List View</button>
+
 <svg id="fillgauge" width="97%" height="250" onclick="">
   <pattern id = "globe" height = "100%" width = "100%"            
                    patternContentUnits = "objectBoundingBox">
@@ -45,13 +48,13 @@
 
 </script>
 
-<div>
+<div id="bucket-items">
   {% if bucket_list %}
     {% for item in bucket_list.priv_items %}
       {{ item.public_item.title }}<br>
         <a href="/{{ item.list_id }}/{{ item.id }}"></a>
         <input type="image" class="private-item" src="{{ item.public_item.image }}" class="private-image" 
-        alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}" 
+        alt="Bucket Item" width="128" data-id="{{ item.id }}" 
         data-lat="{{ item.public_item.latitude }}" data-lon="{{ item.public_item.longitude }}" 
         data-tour="{{ item.tour_link }}" data-complete="{{ item.checked_off }}"
         data-title="{{ item.public_item.title }}" data-country="{{ item.public_item.country }}"
@@ -61,6 +64,32 @@
     {% endfor %}
   {% endif %}
 </div>
+
+<script>
+
+  function initalizeGoogleMaps() {
+    initMap();
+    initAutocomplete();
+  }
+ $("#map-view").on("click", function() {
+    $("#map").show();
+    google.maps.event.trigger(map, "resize");
+    console.log("resized");
+    google.maps.event.addDomListener(window, 'resize', function() {
+      map.setCenter(center);
+      });
+    $("#bucket-items").hide();
+    $("#map-view").hide();
+    $("#list-view").show();
+ });
+ $("#list-view").on("click", function() {
+    $("#bucket-items").show();
+    $("#map").hide();
+    $("#list-view").hide();
+    $("#map-view").show();
+ });
+</script>
+
 
 
 {% if bucket_list %}
@@ -72,7 +101,7 @@
         <h4 class="modal-title">Create An Item</h4>
       </div>
       <div class="modal-body">
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initAutocomplete" async defer></script>
+
         <style>
         #pac-input {
                 background-color: #fff;
@@ -206,6 +235,77 @@
 
 <script src="/static/js/itemDetailsModal.js"></script>
 <script src="/static/js/addPrivateItemModal.js"></script>
+
+
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 80%;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
+<div id="map"></div>
+
+<script>
+  $("#map").hide();
+  var map;
+  function initMap() {
+    // Initalize a new map object
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 47.36667, lng: 8.55},
+        zoom: 4
+      });
+      // Safe stops jinja from converting quotes to '&#39;
+      var myLocations = {{ places | safe }};
+      function setMarkers(map) {
+        for (var i = 0; i < myLocations.length; i++) {
+          var place = myLocations[i];
+          var title = place[0];
+          var address = place[3];
+          var image = place[4];
+
+          let contentString = "<h4>"+ title + "</h4><br><img width=128 src=" + image + "><br>" + address;
+          console.log(contentString);
+
+          var infowindow = new google.maps.InfoWindow();
+          console.log(infowindow);
+          
+          var marker = new google.maps.Marker({
+            position: {lat: place[1], lng: place[2]},
+            map: map,
+            title: place[0]
+          });
+          marker.addListener("click", function() {
+            addWindow(this, infowindow, contentString)
+          })
+
+          marker.setMap(map);;
+        }
+      }
+
+      function addWindow(marker, infowindow, contentString) {
+          console.log(marker);
+          console.log(infowindow);
+          console.log(contentString);
+          infowindow.setContent(contentString);
+          infowindow.open(map, marker);
+      }
+    setMarkers(map)
+  }
+</script>
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initalizeGoogleMaps" async defer></script>
+
+
 
 
 

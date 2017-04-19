@@ -404,8 +404,11 @@ def display_bucket_list(list_id):
     print bucket_list
     print bucket_list.priv_items
     for item in bucket_list.priv_items:
-        item_coordinates = [item.public_item.title, item.public_item.latitude,
-                            item.public_item.longitude]
+        item_coordinates = [item.public_item.title,
+                            item.public_item.latitude,
+                            item.public_item.longitude,
+                            item.public_item.address.encode('UTF-8'),
+                            item.public_item.image.encode('UTF-8')]
         places.append(item_coordinates)
     
     # change back to UTF-8
