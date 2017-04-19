@@ -3,6 +3,8 @@ import unittest
 from server import app
 from model import db, example_data, connect_to_db
 from selenium import webdriver
+import time
+import os
 
 
 class BucketTests(unittest.TestCase):
@@ -12,25 +14,20 @@ class BucketTests(unittest.TestCase):
         self.client = app.test_client()
         app.config['TESTING'] = True
         chromedriver = "/Users/ameliacgreen/Downloads/chromedriver"
-        os.environ["webdriver.chrome.driver"] = chromedriver
         driver = webdriver.Chrome(chromedriver)
 
     def test_homepage(self):
         result = self.client.get("/")
-        self.assertIn("ADVENTURE AWAITS", result.data)
+        self.assertIn("Inspiration", result.data)
 
     def test_mylists(self):
         """Test if user can't see my-lists if they are not signed in"""
         result = self.client.get("/my-lists", follow_redirects=True)
         self.assertIn("You are not signed in", result.data)
 
-    def test_public_map(self):
-        result = self.client.get("/map")
-        self.assertIn("See The Eiffel Tower", result.data)
-
     def test_item_page(self):
         result = self.client.get("/my-lists/1")
-        self.assertIn("Add a new item", result.data)
+        self.assertIn("Create a new item", result.data)
 
     def test_registration(self):
         result = self.client.post("/register", data={"first-name": "Auden",
@@ -57,17 +54,12 @@ class BucketTests(unittest.TestCase):
                                             follow_redirects=True)
         self.assertIn("Create a new list", result.data)
 
+    def test_homepage_selenium(self):
+        driver.get("/")
+
     ### second test login with different get results
 
-    def test_mylists(self):
-        self.browser.get('http://localhost:5000/')
-
-        my_lists = self.browser.find_element_by_id('my-lists')
-        my_lists.click()
-    
-
-
-
+class DatabaseTests(unittest.TestCase):
     """Flask tests that use the database."""
 
     def setUp(self):

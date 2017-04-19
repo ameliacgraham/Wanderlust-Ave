@@ -1,75 +1,18 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+// <!DOCTYPE html>
+// <meta charset="utf-8">
+// <div id="tooltip-container"></div>
 
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  width: 960px;
-  height: 500px;
-  position: relative;
-}
+// <div id="canvas-svg"></div>
 
-#canvas {
-}
+// <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+// <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
+// <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
-#canvas-svg {
-}
-
-
-.land {
-  fill: #222;
-}
-
-.boundary {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1px;
-}
-
-#tooltip-container {
-  position: absolute;
-  background-color: #fff;
-  color: #000;
-  padding: 10px;
-  border: 1px solid;
-  display: none;
-}
-
-.tooltip_key {
-  font-weight: bold;
-}
-
-.tooltip_value {
-  margin-left: 20px;
-  float: right;
-}
-
-</style>
-
-<form action="/search/country" id="country-dropdown-form" method='GET'>
-  <select name="country-name" id="country-dropdown">
-      {% for country in countries %}
-        <option value="{{ country }}">{{ country }}</option>
-      {% endfor %}
-  </select>
-  <input type="submit" name="country-search-dropdown-button" value="Search">
-</form>
-
-<div id="tooltip-container"></div>
-
-<div id="canvas-svg"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-
-<form action="/search/country" id="country-form" hidden>
-  <input type="text" id="country-name" name="country-name" value="">
-  <input type="submit">
-</form>
-
-<script>
-
+// <form action="/search/country" id="country-form" hidden>
+//   <input type="text" id="country-name" name="country-name" value="">
+//   <input type="submit">
+// </form>
+ -->
 
 d3.json("/countries.json", function(err, data) {
     console.log(data[0]);
@@ -282,6 +225,3 @@ d3.json("/countries.json", function(err, data) {
   d3.select(self.frameElement).style("height", (height * 2.3 / 3) + "px");
 
 });
-
-
-</script>

@@ -11,7 +11,6 @@
 <body>
 {% if email %}
   Hi {{ email }}!
-  <a href="/my-lists" id="my-lists">My Lists</a>
   <button id="logout-button">Logout</button>
 {% endif %}
 
@@ -21,11 +20,6 @@
   </fb:login-button>
   <button id="login-button">Login</button>
 {% endif %}
-  <a href="/map">Map</a>
-<form action="/search">
-  <input type="search" name="public-search" placeholder="search">
-  <input type="submit" value="Search"><br><br><br><br>
-</form>
   <ul>
     {% for message in get_flashed_messages() %}
       <li>{{ message }}</li>

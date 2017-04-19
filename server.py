@@ -32,13 +32,39 @@ def display_homepage():
     """Homepage"""
 
     public_items = PublicItem.query.all()
+    countries = Country.query.all()
+    country_names = []
+    for country in countries:
+        country_names.append(country.name)
+
+    sorted_countries = sorted(country_names)
     email = session.get("email")
     lists = BucketList.query.filter(BucketList.email==email).all()
+    
+    user = None
+    friends = None
+    progress_results = None
+    items = None
+    checked_off_items = None
+
+    if email:
+        user = User.query.get(email)
+        # list of user objects for friends
+        friends = user.followers
+        lists = BucketList.query.filter(BucketList.email==email).all()
+        progress_results = user.get_progress()
+
+        items = progress_results['total_items']
+        checked_off_items = progress_results['checked_items']
 
     return render_template("homepage.html", 
                            public_items=public_items,
                            lists=lists,
-                           email=email)
+                           email=email,
+                           country_names=sorted_countries,
+                           friends=friends,
+                           checked_off_items=checked_off_items,
+                           items=items)
 
 @app.route('/register', methods=['POST'])
 def process_registation_form():
@@ -244,6 +270,7 @@ def get_num_of_common_items_per_friend():
             counts.append(items_tally)
 
         max_friend = sorted(common_items_count.items(), key=operator.itemgetter(1))[-1]
+        print counts
 
         results = {"items_tally": counts,
                    "max_friend": max_friend}
@@ -314,17 +341,17 @@ def display_profile(facebook_id):
                             email=email,
                             lists=user_bucket_lists)
 
-@app.route('/facebook/friends')
-def display_fb_friends():
-    """Displays a user's facebook friends."""
-    email = session['email']
-    user = User.query.get(email)
-    # list of user objects for friends
-    friends = user.followers
+# @app.route('/facebook/friends')
+# def display_fb_friends():
+#     """Displays a user's facebook friends."""
+#     email = session['email']
+#     user = User.query.get(email)
+#     # list of user objects for friends
+#     friends = user.followers
 
-    return render_template("facebook-friends.html",
-                            friends=friends,
-                            email=email)
+#     return render_template("facebook-friends.html",
+#                             friends=friends,
+#                             email=email)
 
 @app.route('/facebook/post', methods=['POST'])
 def post_completed_bucket_item():
@@ -699,21 +726,21 @@ def calculate_items_per_country():
 
     return jsonify(country_tallies)
 
-@app.route('/d3map')
-def display_d3_map():
-    email = session.get("email")
-    countries = Country.query.all()
-    country_names = []
-    for country in countries:
-        country_names.append(country.name)
+# @app.route('/d3map')
+# def display_d3_map():
+#     email = session.get("email")
+#     countries = Country.query.all()
+#     country_names = []
+#     for country in countries:
+#         country_names.append(country.name)
 
-    sorted_countries = sorted(country_names)
-    print sorted_countries
+#     sorted_countries = sorted(country_names)
+#     print sorted_countries
 
 
-    return render_template("index.html",
-                           countries=sorted_countries,
-                           email=email)
+#     return render_template("index.html",
+#                            countries=sorted_countries,
+#                            email=email)
 
 @app.route('/map')
 def display_google_map():
@@ -737,6 +764,13 @@ def display_google_map():
                            places=places,
                            email=email)
 
+@app.route('/explore')
+def explore_center():
+    """Main page for a user"""
+    email = session['email']
+
+    return render_template("explore.html",
+                           email=email)
 
 if __name__ == "__main__":
 

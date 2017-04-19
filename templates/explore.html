@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+<h1>Explore</h1>
+<button id="search-by-country">Search by Country</button>
+<button id="facebook-friends">Facebook Friends</button>
+<button id="trip-planner">Trip Ideas</button>
+<button id="my-lists-button">My Lists</button>
+<button id="google-maps">Google Map View</button>
+  <form action="/search">
+  <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
+  <input type="submit" id="search-button" value="Search">
+  </form>
+<script>
+  $("#search-by-country").on("click", function() {
+    window.location.assign("/d3map");
+  })
+  $("#facebook-friends").on("click", function() {
+    window.location.assign("/facebook/friends");
+  })
+  $("#trip-planner").on("click", function() {
+    window.location.assign("/profile-user");
+  })
+  $("#my-lists-button").on("click", function() {
+    window.location.assign("/my-lists");
+  })
+  $("#google-maps").on("click", function() {
+    window.location.assign("/map");
+  })
+
+</script>
+
+
+{% endblock %}
