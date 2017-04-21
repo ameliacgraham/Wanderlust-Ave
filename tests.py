@@ -7,55 +7,75 @@ import time
 import os
 
 
-class BucketTests(unittest.TestCase):
-    """Tests for WanderList."""
+# class BucketTests(unittest.TestCase):
+#     """Tests for WanderList."""
 
-    def setUp(self):
-        self.client = app.test_client()
-        app.config['TESTING'] = True
-        chromedriver = "/Users/ameliacgreen/Downloads/chromedriver"
-        driver = webdriver.Chrome(chromedriver)
+#     def setUp(self):
+#         self.client = app.test_client()
+#         app.config['TESTING'] = True
 
-    def test_homepage(self):
-        result = self.client.get("/")
-        self.assertIn("Inspiration", result.data)
+#     def test_homepage(self):
+#         result = self.client.get("/")
+#         self.assertIn("Inspiration", result.data)
 
-    def test_mylists(self):
-        """Test if user can't see my-lists if they are not signed in"""
-        result = self.client.get("/my-lists", follow_redirects=True)
-        self.assertIn("You are not signed in", result.data)
+#     def test_mylists(self):
+#         """Test if user can't see my-lists if they are not signed in"""
+#         result = self.client.get("/my-lists", follow_redirects=True)
+#         self.assertIn("You are not signed in", result.data)
 
-    def test_item_page(self):
-        result = self.client.get("/my-lists/1")
-        self.assertIn("Create a new item", result.data)
+#     def test_item_page(self):
+#         result = self.client.get("/my-lists/1")
+#         self.assertIn("Create a new item", result.data)
 
-    def test_registration(self):
-        result = self.client.post("/register", data={"first-name": "Auden",
-                                                     "last-name": "Ezra",
-                                                     "username": "cats",
-                                                     "password": "purr",
-                                                     "email": "auden@gmail.com"},
-                                                follow_redirects=True)
-        self.assertIn("Hi cats!", result.data)
+#     def test_registration(self):
+#         result = self.client.post("/register", data={"first-name": "Auden",
+#                                                      "last-name": "Ezra",
+#                                                      "username": "cats",
+#                                                      "password": "purr",
+#                                                      "email": "auden@gmail.com"},
+#                                                 follow_redirects=True)
+#         self.assertIn("Hi cats!", result.data)
 
-    def test_duplicate_registration(self):
-        result = self.client.post("/register", data={"first-name": "Hackbright",
-                                                     "last-name": "Academy",
-                                                     "username": "balloonicorn",
-                                                     "password": "party",
-                                                     "email": "balloonicorn@gmail.com"},
-                                                follow_redirects=True)
-        self.assertIn("balloonicorn already exists", result.data)
+#     def test_duplicate_registration(self):
+#         result = self.client.post("/register", data={"first-name": "Hackbright",
+#                                                      "last-name": "Academy",
+#                                                      "username": "balloonicorn",
+#                                                      "password": "party",
+#                                                      "email": "balloonicorn@gmail.com"},
+#                                                 follow_redirects=True)
+#         self.assertIn("balloonicorn already exists", result.data)
 
 
-    def test_login(self):
-        result = self.client.post("/login", data={"username": "balloonicorn",
-                                                  "password": "party"},
-                                            follow_redirects=True)
-        self.assertIn("Create a new list", result.data)
+#     def test_login(self):
+#         result = self.client.post("/login", data={"username": "balloonicorn",
+#                                                   "password": "party"},
+#                                             follow_redirects=True)
+#         self.assertIn("Create a new list", result.data)
 
-    def test_homepage_selenium(self):
-        driver.get("/")
+# class SeleniumTests(unittest.TestCase):
+
+#     def setUp(self):
+#         self.client = app.test_client()
+#         app.config['TESTING'] = True
+#         self.browser = webdriver.Chrome()
+
+#         # Connect to test database (uncomment when testing database)
+#         connect_to_db(app, "postgresql:///testdb")
+
+#         # Create tables and add sample data (uncomment when testing database)
+#         db.create_all()
+#         example_data()
+
+#     def tearDown(self):
+#         # (uncomment when testing database)
+#         db.session.close()
+#         db.drop_all()
+#         self.browser.quit()
+
+#     def test_title(self):
+#         self.browser.get('http://localhost:5000/')
+
+
 
     ### second test login with different get results
 
@@ -67,6 +87,7 @@ class DatabaseTests(unittest.TestCase):
 
         self.client = app.test_client()
         app.config['TESTING'] = True
+        self.browser = webdriver.Chrome()
 
         # Connect to test database (uncomment when testing database)
         connect_to_db(app, "postgresql:///testdb")
@@ -75,12 +96,53 @@ class DatabaseTests(unittest.TestCase):
         db.create_all()
         example_data()
 
+    def test_registration(self):
+        self.browser.get('http://localhost:5000/')
+        self.assertEqual(self.browser.title, 'Wanderlust Ave')
+        time.sleep(5)
+        register_button = self.browser.find_element_by_id('register-button')
+        register_button.click()
+        time.sleep(2)
+        first_name = self.browser.find_element_by_id("first-name-registration")
+        first_name.send_keys("Alexa")
+        time.sleep(2)
+        last_name = self.browser.find_element_by_id("last-name-registration")
+        last_name.send_keys("Smith")
+        time.sleep(2)
+        username = self.browser.find_element_by_id("username-registration")
+        username.send_keys("alexa123")
+        time.sleep(2)
+        password = self.browser.find_element_by_id("password-registration")
+        password.send_keys("alex123")
+        time.sleep(2)
+        email = self.browser.find_element_by_id("email-registration")
+        email.send_keys("alexa@gmail.com")
+        register_submit = self.browser.find_element_by_id('register-submit')
+        register_submit.click()
+        time.sleep(2)
+        homepage_button = self.browser.find_element_by_id("wanderlust-ave-button")
+        homepage_button.click()
+        time.sleep(3)
+        login_button = self.browser.find_element_by_id("login-button-modal")
+        login_button.click()
+        time.sleep(2)
+        email_login = self.browser.find_element_by_id("email-login")
+        email_login.send_keys("alexa@gmail.com")
+        time.sleep(2)
+        password_login = self.browser.find_element_by_id("password-login")
+        password_login.send_keys("alex123")
+        time.sleep(2)
+        login_modal_submit = self.browser.find_element_by_id("login-modal-submit")
+        time.sleep(2)
+
+
     def tearDown(self):
         """Do at end of every test."""
 
         # (uncomment when testing database)
         db.session.close()
         db.drop_all()
+
 
 if __name__ == '__main__':
     unittest.main()

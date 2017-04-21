@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $("#login-button").on("click", function(evt) {
+    $("#login-button-modal").on("click", function(evt) {
         $("#login-modal").modal("show");
     });
     $("#login-submit").on("submit", function(evt) {
@@ -7,7 +7,11 @@ $(document).ready(function() {
         var email = $("#email").val();
         var password = $("#password").val();
         $.post("/login", {"email": email, "password": password},
-            function() {$("#add-private-item").modal("hide");
+            function() {$("#login-modal").modal("hide");
+            window.location.assign("/d3map");
             });
         });
+    $("#lo")
 });
+
+

@@ -74,10 +74,9 @@
  $("#map-view").on("click", function() {
     $("#map").show();
     google.maps.event.trigger(map, "resize");
+    map.setCenter(center);
+
     console.log("resized");
-    google.maps.event.addDomListener(window, 'resize', function() {
-      map.setCenter(center);
-      });
     $("#bucket-items").hide();
     $("#map-view").hide();
     $("#list-view").show();
@@ -258,10 +257,11 @@
 <script>
   $("#map").hide();
   var map;
+  var center = {lat: 47.36667, lng: 8.55};
   function initMap() {
     // Initalize a new map object
       map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 47.36667, lng: 8.55},
+        center: center,
         zoom: 4
       });
       // Safe stops jinja from converting quotes to '&#39;
@@ -300,6 +300,9 @@
           infowindow.open(map, marker);
       }
     setMarkers(map)
+    google.maps.event.addDomListener(window, 'resize', function() {
+      map.setCenter(center);
+    });
   }
 </script>
 </div>

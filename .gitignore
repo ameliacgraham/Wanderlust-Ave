@@ -4,3 +4,6 @@ server.pyc
 .DS_Store
 secrets.sh
 static/images
+.coverage
+ghostdriver.log
+scratch_pad.py

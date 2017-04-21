@@ -75,17 +75,81 @@ body {
 
 {% block content %}
 <br><br>
-<button id="search-by-country">Explore by Country</button>
-<button id="inspiration">Inspiration</button>
 {% if email %}
-<button id="my-lists-button">My Lists</button>
-<button id="facebook-friends">Facebook Friends</button>
-<button id="trip-planner">Trip Ideas</button>
-<button id="total-progress">Total Progress</button>
-<form action="/search">
-  <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
-  <input type="submit" id="search-button" value="Search"><br><br><br><br><br>
-</form>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" id="wanderlust-ave-button" href="/">Wanderlust Ave</a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span> 
+      </button>
+      
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="#" id="inspiration">Inspiration</a></li>
+        <li><a href="#" id="my-lists-button">My Lists</a></li>
+        <li><a href="#" id="trip-planner">Trip Ideas</a></li>
+        <form class="navbar-form navbar-left" action="/search">
+          <div class="form-group">
+            <input type="text" id="keyword-search" name="public-search" class="form-control" placeholder="Search" value="">
+          </div>
+        <button type="submit" id="search-button" class="btn btn-default">Submit</button>
+        </form>
+        <li><a href="#" id="search-by-country">Explore by Country</a></li>
+<!--         <li><a href="#" id="facebook-friends">Facebook Friends</a></li> -->
+        <li><a href="#" id="total-progress">Total Progress</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" id="logout-button">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- 
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">WebSiteName</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="#">Page 1</a></li>
+      <li><a href="#">Page 2</a></li>
+      <li><a href="#">Page 3</a></li>
+    </ul>
+  </div>
+</nav> -->
+
+<!--   <button id="search-by-country">Explore by Country</button>
+  <form action="/search">
+    <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
+    <input type="submit" id="search-button" value="Search"><br><br><br><br><br>
+  </form> -->
+
+  {% else %}
+  <nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" id="wanderlust-ave-button" href="/">Wanderlust Ave</a>
+    </div>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="#" id="register-button"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+      <li><a href="#" id="login-button-modal">Login</a></li>
+
+    </ul>
+  </div>
+</nav>
+  <button id="search-by-country">Explore by Country</button>
+  <button id="inspiration">Inspiration</button>
+  <form action="/search">
+    <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
+    <input type="submit" id="search-button" value="Search"><br><br><br><br><br>
+  </form>
+
+
 {% endif %}
 <script>
   $("#search-by-country").on("click", function() {
@@ -123,6 +187,8 @@ body {
     $("#facebook-friends-div").hide();
     $("#public-items-div").hide();
     $("#search-by-country-div").hide();
+    $("#max-country-info").show();
+    $("#max-friend-info").hide();
     $("#friend-analysis-button").on("click", function(){
       $("#country-analysis-button").show();
       $("#friend-analysis-button").hide();
@@ -168,6 +234,12 @@ body {
     $("#country-svg").attr("width", 0);
     $("#friend-svg").attr("height", 0);
     $("#friend-svg").attr("width", 0);
+    $.get("/my-lists", function(response) {
+      $("#list-title").html("");
+      for (i = 0; i < response.lists.length; i++) { 
+        $("#list-title").append("<option value='" + response.lists.title + "'>" + response.lists.title + "</option>");
+      }
+    });
   })
   $("#total-progress").on("click", function() {
     $("#total-progress-div").show();
@@ -181,6 +253,9 @@ body {
     $("#country-svg").attr("width", 0);
     $("#friend-svg").attr("height", 0);
     $("#friend-svg").attr("width", 0);
+  })
+  $("wanderlust-ave-button").on("click", function() {
+    window.location.assign("/");
   })
 
 </script>
@@ -199,8 +274,8 @@ body {
           Please enter an email address and username.<br>
           This will allow you to login to WanderList without Facebook,<br>
           if you wish in the future.<br>
-          Username: <input id="username" type="text" name="username"><br>
-          Email: <input id="email" type="text" name="email">
+          Username: <input id="username-facebook-login" type="text" name="username-facebook-login"><br>
+          Email: <input id="email-login-facebook" type="text" name="email">
           <input type="hidden" name="id" id="facebook-id">
           <input type="hidden" name="name" id="facebook-name">
           <input type="hidden" name="new" value="true">
@@ -250,10 +325,12 @@ body {
       <div class="modal-body">
         <form action="/login" method="POST">
           <label>Email:</label>
-            <input type="text" name="email" id="email" placeholder="email" required><br><br>
+            <input type="text" name="email" id="email-login" placeholder="email" required><br><br>
           <label>Password:</label>
-            <input type="password" name="password" id="password" placeholder="password" required><br><br>
-            <input type="submit" id="login-submit"value="Login">
+            <input type="password" name="password" id="password-login" placeholder="password" required><br><br>
+            <input type="submit" id="login-modal-submit"value="Login">
+            <fb:login-button scope="public_profile,email,user_friends" id="facebook-login" onlogin="checkLoginState();">
+            </fb:login-button>
         </form>
       </div>
     </div><!-- /.modal-content -->
@@ -270,15 +347,15 @@ body {
       <div class="modal-body">
         <form action="/register" method="POST">
           <label>First Name:</label>
-            <input type="text" id="first-name" name="first-name" placeholder="First Name"><br><br>
+            <input type="text" id="first-name-registration" name="first-name" placeholder="First Name"><br><br>
           <label>Last Name:</label>
-            <input type="text" id="last-name" name="last-name" placeholder="Last Name"><br><br>  
+            <input type="text" id="last-name-registration" name="last-name" placeholder="Last Name"><br><br>  
           <label>Username:</label>
-             <input type="text" id="username" name="username" placeholder="username"><br><br>
+             <input type="text" id="username-registration" name="username" placeholder="username"><br><br>
           <label>Password:</label>
-            <input type="password" id="password" name="password" placeholder="password" required><br><br>
+            <input type="password" id="password-registration" name="password" placeholder="password" required><br><br>
           <label>Email:</label>
-            <input type="email" id="email" name="email" placeholder="email" required><br><br>
+            <input type="email" id="email-registration" name="email" placeholder="email" required><br><br>
           <input type="submit" id="register-submit">
         </form>
       </div>
@@ -334,12 +411,13 @@ body {
     <button id="create-new-list-button">Create a new list</button><br>
 
     Progress: {{ checked_off_items }} / {{ items }}<br><br>
-
-      {% if lists %}
-        {% for list in lists %}
-          <a href="/my-lists/{{ list.id }}" id="list{{ list.id }}">{{ list.title }}</a><br><br>
-        {% endfor %}
-      {% endif %}
+      <ul id="list-links">
+        {% if lists %}
+          {% for list in lists %}
+            <li><a href="/my-lists/{{ list.id }}" id="list{{ list.id }}">{{ list.title }}</a></li>
+          {% endfor %}
+        {% endif %}
+      </ul>
 
     {% if email %}
     <div class="modal fade" id="add-bucket-list" tabindex="-1" role="dialog">
@@ -352,7 +430,7 @@ body {
           <div class="modal-body">
             <form action="/my-lists" id='list-modal' method='POST'>
               <label>Title: </label>
-                <input type="text" name="title" id="list-title" placeholder="My Bucket List"><br><br>
+                <input type="text" name="title" id="list-name" placeholder="My Bucket List"><br><br>
                 <input type="hidden" name="email" id="email" value={{ session["email"] }}>
                 <input type="submit" value="Create">
             </form>

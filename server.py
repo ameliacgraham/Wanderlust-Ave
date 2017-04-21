@@ -103,8 +103,7 @@ def process_login_info():
     if user_query and user_query.password == password:
         session["username"] = username
         session["email"] = user_query.email
-        flash("You have successfully logged in!")
-        return redirect("/my-lists")
+        return redirect("/")
     else:
         return "Email or Password is incorrect. Please try again!"
 
@@ -199,7 +198,8 @@ def log_user_out():
 
     del session['username']
     del session['email']
-    del session['token']
+    if session.get('token'):
+        del session['token']
     public_items = PublicItem.query.all()
     flash("You have successfully logged out!")
     return redirect("/")
@@ -223,10 +223,14 @@ def get_country_tallies_for_user_items():
             country = {"country": country, "num_of_items": tally}
             countries.append(country)
 
-    max_country = sorted(country_tallies.items(), key=operator.itemgetter(1))[-1]
+            max_country = sorted(country_tallies.items(), key=operator.itemgetter(1))[-1]
 
-    results = {"countries": countries,
-                "max_country": max_country}
+        results = {"countries": countries,
+                    "max_country": max_country}
+
+    else:
+        results = {"countries": None,
+                   "max_country": None}
 
     print country_tallies.items()
     print countries
@@ -388,29 +392,25 @@ def display_bucket_lists():
 
             items = progress_results['total_items']
             checked_off_items = progress_results['checked_items']
-
-            return render_template("user-lists.html", 
-                                user_bucket_lists=user_bucket_lists,
-                                email=email,
-                                items=items,
-                                checked_off_items=checked_off_items)
+            # return jsonify(user_bucket_lists)
         else:
             flash("You are not signed in")
             return redirect('/login')
 
     title = request.form.get('title')
-    email = request.form.get('email')
+    email = session.get('email')
 
     user_list = BucketList.query.filter(BucketList.email==email,
                                         BucketList.title==title).first()
     if not user_list:
         title = request.form.get('title')
-        email = request.form.get('email')
+        email = session.get('email')
         new_list = BucketList(email=email, title=title)
         db.session.add(new_list)
         db.session.commit()
-        flash("Your list has been created!")
-        return "List Added"
+        list_id = new_list.id
+
+        return jsonify({"list_id": list_id})
     elif title == "":
         return "Please choose a title for your list"
 
@@ -774,11 +774,13 @@ def explore_center():
 
 if __name__ == "__main__":
 
-    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
     app.debug = True
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
-
-    connect_to_db(app)
+    if app.config['TESTING'] is True:
+        connect_to_db(app, "postgresql:///testdb")
+    else:
+        connect_to_db(app)
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)

@@ -17,9 +17,13 @@ $(document).ready(function() {
   // });
   $("#logout-button").on('click', function () {
     FB.getLoginStatus(function(response) {
-      FB.logout(function() {
-        window.location = '/logout';
-      });
+      if (response.status === 'connected') {
+        FB.logout(function() {
+          window.location.assign('/logout');
+        });
+      } else {
+        window.location.assign('/logout')
+      }
     })
   })
 });

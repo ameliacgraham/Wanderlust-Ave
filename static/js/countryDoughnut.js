@@ -48,7 +48,12 @@ d3.json("/country-tallies.json", function(error, data) {
             $("#country-name-user").val(country);
             // console.log($("#country-name").val());
             $("#country-user-items-form").submit();
-            });;
+            });
+
+      // .on("mousemove", function(d) {
+      //   $(this).attr("fill-opacity", "0.8");
+      // });
+      ;
 
 
  var logo = g.append("circle")
