@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $(".private-item").on("click", function(evt) {
+    $(".private-image").on("click", function(evt) {
         var title = $(this).data("title");
         var lat = $(this).data("lat");
         var lon = $(this).data("lon");

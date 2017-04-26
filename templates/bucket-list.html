@@ -3,29 +3,212 @@
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="/static/js/progressWave.js" language="JavaScript"></script>
 <style>
-    .liquidFillGaugeText { font-family: cursive; font-weight: bold; }
+  .liquidFillGaugeText { font-family: cursive; font-weight: bold; }
+
+  #photos {
+     /* Prevent vertical gaps */
+     line-height: 2;
+     
+     -webkit-column-count: 5;
+     -moz-column-count:    5;
+     column-count:         5;
+     column-gap:           10px;
+  }
+
+  #photos img {
+    /* Just in case there are inline attributes */
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  @media (max-width: 1200px) {
+    #photos {
+    -moz-column-count:    4;
+    -webkit-column-count: 4;
+    column-count:         4;
+    }
+  }
+  @media (max-width: 1000px) {
+    #photos {
+    -moz-column-count:    3;
+    -webkit-column-count: 3;
+    column-count:         3;
+    }
+  }
+  @media (max-width: 800px) {
+    #photos {
+    -moz-column-count:    2;
+    -webkit-column-count: 2;
+    column-count:         2;
+    }
+  }
+  @media (max-width: 400px) {
+    #photos {
+    -moz-column-count:    1;
+    -webkit-column-count: 1;
+    column-count:         1;
+    }
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+/*  height: 150px;*/
+  left: 0;
+  position: absolute;
+  top: 0;
+/*  width: 150px;*/
+}
+
+span.text-content {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+ul.img-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+ul.img-list li {
+  display: inline-block;
+  width: 100%;
+  position: relative;
+}
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+/*  height: 150px;*/
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+ul.img-list li:hover span.text-content {
+  opacity: 1;
+}
+
+span.text-content {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+  left: 0;
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  -webkit-transition: opacity 500ms;
+  -moz-transition: opacity 500ms;
+  -o-transition: opacity 500ms;
+  transition: opacity 500ms;
+}
+
+  #bucket-list-title {
+    text-align: left;
+  }
+
+  #progress-message {
+    text-align: left;
+  }
+
+  #create-item-button {
+    text-align: left;
+  }
+
+  #map-list-view-buttons {
+    text-align: center;
+  }
+
+  .button {
+  background: #d3f9ff;
+  background-image: -webkit-linear-gradient(top, #d3f9ff, #006C7D);
+  background-image: -moz-linear-gradient(top, #d3f9ff, #006C7D);
+  background-image: -ms-linear-gradient(top, #d3f9ff, #006C7D);
+  background-image: -o-linear-gradient(top, #d3f9ff, #006C7D);
+  background-image: linear-gradient(to bottom, #d3f9ff, #006C7D);
+  font-family: Arial;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.button:hover {
+  background: #006C7D;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+ #title-details {
+  font-size: 24px;
+ }
+
+ #fillgauge {
+  display: block;
+  margin: auto;
+ }
+ #bucket-list-title {
+  text-align: center;
+  font-size: 40px;
+ }
+
+ #create-item-button {
+  text-align: center;
+ }
+
+ #progress-message {
+  text-align: center;
+  font-size: 20px;
+ }
+
+ #map-list-view-buttons {
+  text-align: left;
+ }
 </style>
 {% endblock %}
 
 {% block content %}
-
-<h2> {{ bucket_list.title }} </h2>
-
-<button id="create-new-item-button" data-list="{{ bucket_list.title }}">Create a new item</button>
-<p> Progress: {{ progress }} </p>
-<input type="hidden" id="bucket-id" value="{{ b_list_id }}">
-
-<button id="map-view">Map View</button>
-<button id="list-view" hidden>List View</button>
-
-<svg id="fillgauge" width="97%" height="250" onclick="">
-  <pattern id = "globe" height = "100%" width = "100%"            
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-6">
+      <br><br><br>
+      <p id="bucket-list-title"> {{ bucket_list.title }} </p>
+      <div id="create-item-button">
+        <a href="#" class="btn btn-xs btn-info button" id="create-new-item-button" data-list="{{ bucket_list.title }}"><span class="glyphicon glyphicon-plus"></span> Create new item</a>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <p id="progress-message">You've completed {{ progress }} of your bucket items!</p><br>
+      <input type="hidden" id="bucket-id" value="{{ b_list_id }}">
+      <svg id="fillgauge" width="97%" height="250" onclick="">
+        <pattern id = "globe" height = "100%" width = "100%"            
                    patternContentUnits = "objectBoundingBox">
-       <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
- </svg>
+        <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
+      </svg>
+    </div>
+  </div>
+</div>
 
-
-
+<div id="map-list-view-buttons">
+  <a href="#" class="btn btn-sm btn-info button" id="map-view">Map View</a>
+  <button class="button" id="list-view" hidden>List View</button>
+</div>
 <script language="JavaScript">
     var bucketListId = $("#bucket-id").val();
     $.get('/progress.json', {"all_items": "False", "list_id": bucketListId}, function(results) {
@@ -47,23 +230,20 @@
     });
 
 </script>
-
-<div id="bucket-items">
-  {% if bucket_list %}
-    {% for item in bucket_list.priv_items %}
-      {{ item.public_item.title }}<br>
-        <a href="/{{ item.list_id }}/{{ item.id }}"></a>
-        <input type="image" class="private-item" src="{{ item.public_item.image }}" class="private-image" 
-        alt="Bucket Item" width="128" data-id="{{ item.id }}" 
-        data-lat="{{ item.public_item.latitude }}" data-lon="{{ item.public_item.longitude }}" 
-        data-tour="{{ item.tour_link }}" data-complete="{{ item.checked_off }}"
-        data-title="{{ item.public_item.title }}" data-country="{{ item.public_item.country }}"
-        data-address="{{ item.public_item.address }}" data-image="{{ item.public_item.image }}"
-        data-listid="{{ b_list_id }} "><br>
-
-    {% endfor %}
-  {% endif %}
-</div>
+<section id="photos">
+  <ul id="private-images" class="img-list">
+  </ul>
+</section>
+<script>
+        var images = {{ images | safe }};
+        var allImages = "";
+        console.log(images);
+        images.forEach(function(element) {
+        allImages += element;
+        });
+        console.log(allImages)
+        $('#private-images').append(allImages);
+</script>
 
 <script>
 
@@ -77,12 +257,12 @@
     map.setCenter(center);
 
     console.log("resized");
-    $("#bucket-items").hide();
+    $("#photos").hide();
     $("#map-view").hide();
     $("#list-view").show();
  });
  $("#list-view").on("click", function() {
-    $("#bucket-items").show();
+    $("#photos").show();
     $("#map").hide();
     $("#list-view").hide();
     $("#map-view").show();
@@ -198,7 +378,7 @@
         <h4 class="modal-title">Details</h4>
       </div>
       <div class="modal-body" id="details">
-        <div id="item-details">
+        <div id="item-details" hidden>
           <span id="title-details"></span><br>
           <img src="" id="image-details" height="350"><br>
           <span id="address-details">Address: </span><br>
@@ -206,7 +386,7 @@
           <span id="completed">Complete: </span><br>
           <input type='submit' id='edit-button' value='Edit Item'>
         </div>
-        <div id="edit-item-details" hidden>
+        <div id="edit-item-details">
           <span id="edit-title-details"></span><br>
           <img src="" id="edit-image-details" height="350"><br>
           <span id="edit-address-details">Address: </span><br>

@@ -6,12 +6,12 @@
 
 {% block content %}
 
-<div>
+<div id="search-results">
   {% if matched_items %}
     {% for item in matched_items %}
       {{ item.title }} <br>
-        <input type="image" src="{{ item.image }}" class="public-image" 
-              alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}"><br> 
+        <input type="image" id="public-item-{{ item.id }}"src="{{ item.image }}" class="public-image" 
+              alt="Bucket Item" width="300" data-id="{{ item.id }}"><br> 
     {% endfor %}
   {% endif %} 
 </div>

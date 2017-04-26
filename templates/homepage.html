@@ -1,7 +1,6 @@
-{% extends 'base.html' %}
-{% block head %}
-
-<h2>ADVENTURE AWAITS</h2>
+<!doctype html>
+<html>
+<head>
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=1322395004515505"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -9,18 +8,20 @@
 <!-- <div class="fb-login-button" data-max-rows="1" data-size="large" data-show-faces="true" 
 scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginState();"></div> -->
 <div id="fb-root"></div>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navbar Template for Bootstrap</title>
+  <link rel="stylesheet"
+        href="http://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/united/bootstrap.min.css">
 <style>
 
-body {
+/*body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  width: 960px;
-  height: 500px;
   position: relative;
-}
+}*/
 /*D3 Map*/
 #canvas {
 }
+
 
 #canvas-svg {
 }
@@ -67,103 +68,177 @@ body {
   stroke: #fff;
 }
 
+.navbar navbar-inverse {
+  background-color: gray;
+}
+
+#wanderlust-ave-nav {
+  color: #006C7D;
+}
+
+a {
+  font-family: Georgia;
+}
+
+body {
+  background: url("https://s3-us-west-1.amazonaws.com/wanderlist-images/wavegrid.png");
+}
+
 </style>
+</head>
 
 
-
-{% endblock %}
-
-{% block content %}
-<br><br>
-{% if email %}
-<nav class="navbar navbar-inverse">
+<!-- <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a class="navbar-brand" id="wanderlust-ave-button" href="/">Wanderlust Ave</a>
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+      <button type="button"
+              class="navbar-toggle collapsed"
+              data-toggle="collapse"
+              data-target="#navbar"
+              aria-expanded="false"
+              aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
-        <span class="icon-bar"></span> 
+        <span class="icon-bar"></span>
       </button>
-      
+      <a class="navbar-brand" href="/">Wanderlust Ave</a>
     </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
+    <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li><a href="#" id="inspiration">Inspiration</a></li>
         <li><a href="#" id="my-lists-button">My Lists</a></li>
-        <li><a href="#" id="trip-planner">Trip Ideas</a></li>
-        <form class="navbar-form navbar-left" action="/search">
+        <li class="dropdown">
+          <a href="#"
+             class="dropdown-toggle"
+             data-toggle="dropdown"
+             role="button"
+             aria-expanded="false">
+            Exlpore <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#" id="trip-planner">Trip Ideas</a></li>
+            <li><a href="#" id="search-by-country">Explore by Country</a></li>
+            <li><a href="#" id="facebook-friends">Facebook Friends</a></li>
+            <li><a href="#" id="total-progress">Total Progress</a></li> -->
+<!--             <li class="divider"></li>
+            <li class="dropdown-header">Nav header</li>
+            <li><a href="#">Separated link</a></li>
+            <li><a href="#">One more separated link</a></li> -->
+<!--           </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" id="login-button-modal">Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav> -->
+<!--         <form class="navbar-form navbar-left" action="/search">
           <div class="form-group">
             <input type="text" id="keyword-search" name="public-search" class="form-control" placeholder="Search" value="">
           </div>
         <button type="submit" id="search-button" class="btn btn-default">Submit</button>
+        </form> -->
+<body>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button"
+                class="navbar-toggle collapsed"
+                data-toggle="collapse"
+                data-target="#navbar"
+                aria-expanded="false"
+                aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" id="wanderlust-ave-nav" href="/">Wanderlust Ave</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/my-lists" id="my-lists-button">My Lists</a></li>
+          <li class="dropdown">
+            <a href="#"
+               class="dropdown-toggle"
+               data-toggle="dropdown"
+               role="button"
+               aria-expanded="false">
+              Exlpore <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="/popular-items">Popular Bucket Items</a></li>
+              <li><a href="/search/country" id="search-by-country">Explore by Country</a></li>
+              {% if email %}
+                <li><a href="/facebook/friends" id="facebook-friends">Friends</a></li>
+                <li><a href="/profile-user" id="trip-planner">Trip Ideas</a></li>
+              {% endif %}
+  <!--             <li class="divider"></li>
+              <li class="dropdown-header">Nav header</li>
+              <li><a href="#">Separated link</a></li>
+              <li><a href="#">One more separated link</a></li> -->
+            </ul>
+          </li>
+        </ul>
+          <div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search" name="q">
+                  <div class="input-group-btn">
+                    <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                  </div>
+              </div>
+            </form>
+          </div>
+        <ul class="nav navbar-nav navbar-right">
+          {% if email %}
+            <li><a href="/logout">Logout</a></li>
+          {% else %}
+            <li><a href="#login" id="login-button-modal">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="modal fade" id="login-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Login</h4>
+      </div>
+      <div class="modal-body">
+        <form action="/login" method="POST">
+          <label>Email:</label>
+            <input type="text" name="email" id="email-login" placeholder="email" required><br><br>
+          <label>Password:</label>
+            <input type="password" name="password" id="password-login" placeholder="password" required><br><br>
+            <input type="submit" id="login-modal-submit"value="Login">
+            <fb:login-button scope="public_profile,email,user_friends" id="facebook-login" onlogin="checkLoginState();">
+            </fb:login-button>
         </form>
-        <li><a href="#" id="search-by-country">Explore by Country</a></li>
-<!--         <li><a href="#" id="facebook-friends">Facebook Friends</a></li> -->
-        <li><a href="#" id="total-progress">Total Progress</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#" id="logout-button">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-<!-- 
-<nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">WebSiteName</a>
-    </div>
-    <ul class="nav navbar-nav">
-      <li class="active"><a href="#">Home</a></li>
-      <li><a href="#">Page 1</a></li>
-      <li><a href="#">Page 2</a></li>
-      <li><a href="#">Page 3</a></li>
-    </ul>
-  </div>
-</nav> -->
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
-<!--   <button id="search-by-country">Explore by Country</button>
-  <form action="/search">
-    <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
-    <input type="submit" id="search-button" value="Search"><br><br><br><br><br>
-  </form> -->
-
-  {% else %}
-  <nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" id="wanderlust-ave-button" href="/">Wanderlust Ave</a>
-    </div>
-    <ul class="nav navbar-nav navbar-right">
-      <li><a href="#" id="register-button"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-      <li><a href="#" id="login-button-modal">Login</a></li>
-
-    </ul>
-  </div>
-</nav>
-  <button id="search-by-country">Explore by Country</button>
-  <button id="inspiration">Inspiration</button>
-  <form action="/search">
-    <input type="search" id="keyword-search" name="public-search" placeholder="search" value="">
-    <input type="submit" id="search-button" value="Search"><br><br><br><br><br>
-  </form>
-
-
-{% endif %}
+<script src="/static/js/loginModal.js"></script>
+<script src="/static/js/facebook.js"></script>
+  {% block content %} put your content here {% endblock %}
+</body>
+</html>
 <script>
-  $("#search-by-country").on("click", function() {
-    $("#search-by-country-div").show();
-    $("#public-items-div").hide();
-    $("#facebook-friends-div").hide();
-    $("#my-lists-div").hide();
-    $("#total-progress-div").hide();
-    $("#trip-ideas-div").hide();
-    $("#country-svg").attr("height", 0);
-    $("#country-svg").attr("width", 0);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-  })
+  // $("#search-by-country").on("click", function() {
+  //   $("#search-by-country-div").show();
+  //   $("#public-items-div").hide();
+  //   $("#facebook-friends-div").hide();
+  //   $("#my-lists-div").hide();
+  //   $("#total-progress-div").hide();
+  //   $("#trip-ideas-div").hide();
+  //   $("#country-svg").attr("height", 0);
+  //   $("#country-svg").attr("width", 0);
+  //   $("#friend-svg").attr("height", 0);
+  //   $("#friend-svg").attr("width", 0);
+  // })
   $("#facebook-friends").on("click", function() {
     $("#facebook-friends-div").show();
     $("#public-items-div").hide();
@@ -211,18 +286,18 @@ body {
     })
 
   })
-  $("#my-lists-button").on("click", function() {
-    $("#my-lists-div").show();
-    $("#facebook-friends-div").hide();
-    $("#public-items-div").hide();
-    $("#search-by-country-div").hide();
-    $("#total-progress-div").hide();
-    $("#trip-ideas-div").hide();
-    $("#country-svg").attr("height", 0);
-    $("#country-svg").attr("width", 0);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-  })
+  // $("#my-lists-button").on("click", function() {
+  //   $("#my-lists-div").show();
+  //   $("#facebook-friends-div").hide();
+  //   $("#public-items-div").hide();
+  //   $("#search-by-country-div").hide();
+  //   $("#total-progress-div").hide();
+  //   $("#trip-ideas-div").hide();
+  //   $("#country-svg").attr("height", 0);
+  //   $("#country-svg").attr("width", 0);
+  //   $("#friend-svg").attr("height", 0);
+  //   $("#friend-svg").attr("width", 0);
+  // })
   $("#inspiration").on("click", function() {
     $("#public-items-div").show();
     $("#total-progress-div").hide();
@@ -260,6 +335,13 @@ body {
 
 </script>
 
+  <!--Use "container-fluid" for a responsive page that
+      spans the width of the screen. -->
+
+  <!--REST OF PAGE CONTENT-->
+
+
+
 <div id="status">
 </div>
 <div class="modal fade" id="facebook-login-registration" tabindex="-1" role="dialog">
@@ -291,7 +373,7 @@ body {
 </div><!-- /.modal -->
 
 
-{% if email %}
+<!-- {% if email %}
 <div class="modal fade" id="add-private-item" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -313,7 +395,7 @@ body {
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-{% endif %}
+{% endif %} -->
 
 <div class="modal fade" id="login-modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
@@ -366,7 +448,7 @@ body {
 
 <!--//////////////////////////// -->
 <div id="nav-bar-info">
-  <div id="search-by-country-div" hidden>
+<!--   <div id="search-by-country-div" hidden>
     <div id="tooltip-container"></div>
     <form action="/search/country" id="country-dropdown-form" method='GET'>
       <select name="country-name" id="country-dropdown">
@@ -383,24 +465,22 @@ body {
       <input type="text" id="country-name" name="country-name" value="">
       <input type="submit">
     </form>
-  </div>
+  </div> -->
 
   <div id="public-items-div">
   {% if public_items %}
     {% for item in public_items %}
-      {{ item.title }} <br>
-        <!-- <img src="{{ item.image }}" class="public-image" alt="Bucket Item" width="128" height="128"><br> --> 
-        <input type="image" src="{{ item.image }}" class="public-image" 
-              alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}" data-title="{{ item.title }}"><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ item.title }} <br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="image" src="{{ item.image }}" class="public-image" 
+              alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}" data-title="{{ item.title }}"><br><br><br>
     {% endfor %}
   {% endif %}
   </div>
-  <div id="facebook-friends-div" hidden>
+  <div id="facebook-friends-div" class="facebook-friends" hidden>
   {% if friends %}
     {% for friend in friends %}
-      <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a><br>
-      <a href="/profile/{{ friend.facebook_id }}">
-      <img src="{{ friend.profile_picture }}" alt="Profile Picture" width="128" height="128"></a><br>
+    <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a><br>
+    <img src="{{ friend.profile_picture }}" alt="Profile Picture" width="128" height="128"></a><br>
     {% endfor %}
   {% else %}
     Please sign in to Facebook to View your Facebook Friend's lists
@@ -507,9 +587,7 @@ body {
   </div>
 </div>
 
-<script src="static/js/choroplethMap.js"></script>
 <script src="/static/js/addListModal.js"></script>
-<script src="/static/js/addItemFromModals.js"></script>
 <script src="/static/js/facebook.js"></script>
 <script src="/static/js/loginModal.js"></script>
 <script src="/static/js/registrationModal.js"></script>

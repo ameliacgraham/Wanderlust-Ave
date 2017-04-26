@@ -6,8 +6,8 @@ var width = 960,
     radius = Math.min(width, height) / 2;
 
 var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#7a9cdd", "#7abfdd", "#7addc6"]);
-
+    .range(["#359978", "#00D99E", "#57C9D8", "#6b486b", "#014F5B", "#0293A9"]);
+    
 var arc = d3.svg.arc()
     .outerRadius(radius - 10)
     .innerRadius(radius - 70);

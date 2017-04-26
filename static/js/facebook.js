@@ -57,7 +57,6 @@ function statusChangeCallback(response) {
         function(result) {
           console.log("Back from /facebook");
           if (result === "need email") {
-            debugger;
             $("#facebook-id").val(id);
             $("#facebook-name").val(name);
             // pop up modal window asking for email
@@ -68,7 +67,7 @@ function statusChangeCallback(response) {
           else {
             // AJAX request to route to log user in
             $.post('/facebook/login', {"new": false, "email": email}, function() {
-              console.log("Post request existing user");
+              window.location.assign("/");
             })
           }
         }); 
@@ -97,6 +96,10 @@ FB.init({
                       // the session
   xfbml      : true,  // parse social plugins on this page
   version    : 'v2.8' // use graph api version 2.8
-});
-
+});   
 };
+$(document).ready(function(){
+    $(".facebook-profile").tooltip({
+        placement : 'right'
+    });
+});

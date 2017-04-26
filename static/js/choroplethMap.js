@@ -19,7 +19,7 @@ d3.json("/countries.json", function(err, data) {
     var france = data[0];
 
   var config = {"data0":"Country (or dependent territory)","data1":"Population",
-              "label0":"label 0","label1":"label 1","color0":"#99ccff","color1":"#0050A1",
+              "label0":"label 0","label1":"label 1","color0":"#d3f9ff","color1":"#006C7D",
               "width":960,"height":960}
   
   var width = config.width,

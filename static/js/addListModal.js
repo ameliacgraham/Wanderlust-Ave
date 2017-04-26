@@ -4,7 +4,7 @@ $(document).ready(function() {
     });
     $("#list-modal").on("submit", function(evt) {
         evt.preventDefault();
-        var listName = $("#list-name").val();
+        var listName = $("#list-title").val();
         var email = $("#email").val();
         $.post("/my-lists", {"title": listName, "email": email},
             function(response) {

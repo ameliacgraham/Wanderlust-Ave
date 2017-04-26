@@ -8,10 +8,9 @@ $(document).ready(function() {
         var password = $("#password").val();
         $.post("/login", {"email": email, "password": password},
             function() {$("#login-modal").modal("hide");
-            window.location.assign("/d3map");
+            window.location.assign("/");
             });
         });
-    $("#lo")
 });
 
 

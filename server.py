@@ -57,14 +57,15 @@ def display_homepage():
         items = progress_results['total_items']
         checked_off_items = progress_results['checked_items']
 
-    return render_template("homepage.html", 
-                           public_items=public_items,
-                           lists=lists,
-                           email=email,
-                           country_names=sorted_countries,
-                           friends=friends,
-                           checked_off_items=checked_off_items,
-                           items=items)
+    return render_template("explore.html",
+                            email=email) 
+                           # public_items=public_items,
+                           # lists=lists,
+                           # email=email,
+                           # country_names=sorted_countries,
+                           # friends=friends,
+                           # checked_off_items=checked_off_items,
+                           # items=items)
 
 @app.route('/register', methods=['POST'])
 def process_registation_form():
@@ -203,6 +204,29 @@ def log_user_out():
     public_items = PublicItem.query.all()
     flash("You have successfully logged out!")
     return redirect("/")
+
+@app.route('/popular-items')
+def display_public_items():
+    public_items = PublicItem.query.all()
+    email = session.get("email")
+    lists = BucketList.query.filter(BucketList.email==email).all()
+
+    return render_template("public-items.html",
+                            public_items=public_items,
+                            email=email,
+                            lists=lists)
+
+@app.route('/popluar-items.json')
+def get_public_item_info():
+
+    public_items = PublicItem.query.all()
+
+    images = []
+    for item in public_items:
+        image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
+        images.append(image_info)
+
+    return jsonify(images)
 
 
 @app.route('/country-tallies.json')
@@ -345,17 +369,17 @@ def display_profile(facebook_id):
                             email=email,
                             lists=user_bucket_lists)
 
-# @app.route('/facebook/friends')
-# def display_fb_friends():
-#     """Displays a user's facebook friends."""
-#     email = session['email']
-#     user = User.query.get(email)
-#     # list of user objects for friends
-#     friends = user.followers
+@app.route('/facebook/friends')
+def display_fb_friends():
+    """Displays a user's facebook friends."""
+    email = session['email']
+    user = User.query.get(email)
+    # list of user objects for friends
+    friends = user.followers
 
-#     return render_template("facebook-friends.html",
-#                             friends=friends,
-#                             email=email)
+    return render_template("facebook-friends.html",
+                            friends=friends,
+                            email=email)
 
 @app.route('/facebook/post', methods=['POST'])
 def post_completed_bucket_item():
@@ -392,30 +416,36 @@ def display_bucket_lists():
 
             items = progress_results['total_items']
             checked_off_items = progress_results['checked_items']
-            # return jsonify(user_bucket_lists)
+            return render_template("user-lists.html",
+                                    email=email,
+                                    lists=user_bucket_lists,
+                                    checked_off_items=checked_off_items,
+                                    items=items)
         else:
             flash("You are not signed in")
             return redirect('/login')
 
-    title = request.form.get('title')
-    email = session.get('email')
-
-    user_list = BucketList.query.filter(BucketList.email==email,
-                                        BucketList.title==title).first()
-    if not user_list:
+    else:
         title = request.form.get('title')
+        print title
         email = session.get('email')
-        new_list = BucketList(email=email, title=title)
-        db.session.add(new_list)
-        db.session.commit()
-        list_id = new_list.id
 
-        return jsonify({"list_id": list_id})
-    elif title == "":
-        return "Please choose a title for your list"
+        user_list = BucketList.query.filter(BucketList.email==email,
+                                            BucketList.title==title).first()
+        if not user_list:
+            title = request.form.get('title')
+            email = session.get('email')
+            new_list = BucketList(email=email, title=title)
+            db.session.add(new_list)
+            db.session.commit()
+            list_id = new_list.id
 
-    # flash("You already have a list named {}".format(title))
-    return "Duplicate List"
+            return jsonify({"list_id": list_id})
+        elif title == "":
+            return "Please choose a title for your list"
+
+        # flash("You already have a list named {}".format(title))
+        return "Duplicate List"
 
 # Id of list object instead of title
 @app.route('/my-lists/<list_id>')
@@ -425,6 +455,18 @@ def display_bucket_list(list_id):
     email = session.get("email")
     bucket_list = BucketList.query.filter(BucketList.id==list_id).first()
     b_list_id = list_id
+    images = []
+    for item in bucket_list.priv_items:
+        image_info = ("<li><a href='#'><img src='{}' data-title='{}' data-id='{}'"
+            "data-lat='{}' data-lon='{}' data-tour='{}' data-complete='{}' data-country='{}'"
+            "data-address='{}' data-image='{}' data-listid='{}'"
+            "class='private-image'><span class='text-content'>{}</span></a></li>"
+                                ).format(item.public_item.image, item.public_item.title, 
+                                item.id, item.public_item.latitude, item.public_item.longitude, 
+                                item.tour_link, item.checked_off, item.public_item.country, 
+                                item.public_item.address.encode("utf-8"), item.public_item.image, b_list_id, item.public_item.title)
+        images.append(image_info)
+    print images
 
     places = []
 
@@ -452,7 +494,20 @@ def display_bucket_list(list_id):
                            gm_api_key=gm_api_key,
                            places=places,
                            progress=progress,
-                           email=email)
+                           email=email,
+                           images=images,
+                           checked_off_items=checked_off_items)
+
+# def get_bucket_items(list_id):
+#     email = session.get('email')
+#     bucket_list = BucketList.query.filter(BucketList.id==list_id).first()
+#     images = []
+#     for item in bucket_list.priv_items:
+#         image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.public_item.image, item.public_item.title, item.public_item.id, item.public_item.title)
+#         images.append(image_info)
+
+#     return images
+
 
 
 @app.route('/progress.json')
@@ -668,21 +723,38 @@ def process_search_form():
                             email=email,
                             lists=lists)
 
-@app.route('/search/country')
+@app.route('/search/country', methods=['GET', 'POST'])
 def search_country_items():
-    """Queries public items table for items in a country. Returns matches"""
+    """Displays choropleth map and queries public items table for items in a country. Returns matches"""
 
-    country_name = request.args.get("country-name")
+    if request.method == 'GET':
+        print "Method = Get"
+        email = session.get("email")
+        print email
+        countries = Country.query.all()
+        country_names = []
+        for country in countries:
+            country_names.append(country.name)
 
-    email = session.get('email')
-    lists = BucketList.query.filter(BucketList.email==email).all()
+        sorted_countries = sorted(country_names)
+        print sorted_countries
 
-    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+        return render_template("choropleth-map.html",
+                               countries=sorted_countries,
+                               email=email)
 
-    return render_template("search-results.html",
-                            matched_items=matched_items,
-                            email=email,
-                            lists=lists)
+    else:
+        country_name = request.form.get("country-name")
+
+        email = session.get('email')
+        lists = BucketList.query.filter(BucketList.email==email).all()
+
+        matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+
+        return render_template("search-results.html",
+                                matched_items=matched_items,
+                                email=email,
+                                lists=lists)
 
 @app.route('/search/country/user-items')
 def search_items_by_country_per_user():
@@ -726,22 +798,6 @@ def calculate_items_per_country():
 
     return jsonify(country_tallies)
 
-# @app.route('/d3map')
-# def display_d3_map():
-#     email = session.get("email")
-#     countries = Country.query.all()
-#     country_names = []
-#     for country in countries:
-#         country_names.append(country.name)
-
-#     sorted_countries = sorted(country_names)
-#     print sorted_countries
-
-
-#     return render_template("index.html",
-#                            countries=sorted_countries,
-#                            email=email)
-
 @app.route('/map')
 def display_google_map():
     """Display markers on a map for all public items"""
@@ -764,13 +820,6 @@ def display_google_map():
                            places=places,
                            email=email)
 
-@app.route('/explore')
-def explore_center():
-    """Main page for a user"""
-    email = session['email']
-
-    return render_template("explore.html",
-                           email=email)
 
 if __name__ == "__main__":
 
@@ -783,6 +832,6 @@ if __name__ == "__main__":
         connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
     
     app.run(port=5000, host='0.0.0.0')

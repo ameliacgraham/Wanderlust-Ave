@@ -133,7 +133,23 @@ class DatabaseTests(unittest.TestCase):
         password_login.send_keys("alex123")
         time.sleep(2)
         login_modal_submit = self.browser.find_element_by_id("login-modal-submit")
+        login_modal_submit.click()
         time.sleep(2)
+        explore_by_country = self.browser.find_element_by_id("search-by-country")
+        explore_by_country.click()
+        time.sleep(2)
+        my_lists = self.browser.find_element_by_id("my-lists-button")
+        my_lists.click()
+        time.sleep(2)
+        trip_planner = self.browser.find_element_by_id("trip-planner")
+        trip_planner.click()
+        time.sleep(2)
+        keyword_search = self.browser.find_element_by_id("keyword-search")
+        keyword_search.send_keys("castle lavender")
+        search_button = self.browser.find_element_by_id("search-button")
+        search_button.click()
+        result = self.browser.find_element_by_id('public-item-2')
+        time.sleep(3)
 
 
     def tearDown(self):
