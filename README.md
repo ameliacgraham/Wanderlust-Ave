@@ -4,7 +4,7 @@ My project is a travel app designed to motivate users to create bucket lists and
 ## Table of Contents
 * [Technologies Used](#technologiesused)
 * [APIs](#apis)
-* [Author](#author)
+<!-- * [Author](#author) -->
 
 ## <a name="technologiesused"></a>Technologies Used
 
@@ -17,6 +17,9 @@ My project is a travel app designed to motivate users to create bucket lists and
 * Jinja2
 * HTML/CSS
 * Bootstrap
+* Selenium
+* Boto3
+* D3
 
 
 ## <a name="apis"></a>APIs Used

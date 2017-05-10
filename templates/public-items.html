@@ -5,27 +5,21 @@
    /* Prevent vertical gaps */
    line-height: 2;
    
-   -webkit-column-count: 5;
-   -webkit-column-gap:   0px;
-   -moz-column-count:    5;
-   -moz-column-gap:      0px;
-   column-count:         5;
-   column-gap:           10px;
+   -webkit-column-count: 3;
+   -webkit-column-gap:   15px;
+   -moz-column-count:    3;
+   -moz-column-gap:      15px;
+   column-count:         3;
+   column-gap:           15px;
 }
 
 #photos img {
   /* Just in case there are inline attributes */
   width: 100% !important;
   height: auto !important;
+  padding-bottom: 15px;
 }
 
-@media (max-width: 1200px) {
-  #photos {
-  -moz-column-count:    4;
-  -webkit-column-count: 4;
-  column-count:         4;
-  }
-}
 @media (max-width: 1000px) {
   #photos {
   -moz-column-count:    3;
@@ -49,8 +43,11 @@
 }
 
 body {
-  margin: 0;
   padding: 0;
+}
+
+#public-image-div {
+  margin: 0 50px 20px 50px;
 }
 
 #popuar-items-heading {
@@ -116,7 +113,7 @@ span.text-content {
   display: table;
   left: 0;
   position: absolute;
-  top: 0;
+  top: 15px;
   opacity: 0;
   -webkit-transition: opacity 500ms;
   -moz-transition: opacity 500ms;
@@ -133,10 +130,12 @@ span.text-content {
 
 {% block content %}
 <h2 id="popular-items-heading">Popular Bucket Items</h2>
+<div id="public-image-div">
 <section id="photos">
   <ul id="public-images" class="img-list">
   </ul>
 </section>
+</div>
 <script>
     $.get('/popluar-items.json', function(response) {
         var images = response;

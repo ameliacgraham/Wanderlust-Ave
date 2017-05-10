@@ -363,9 +363,23 @@ def display_profile(facebook_id):
                     .filter(User.email==user.email).all())
     user_bucket_lists = BucketList.query.filter(BucketList.email==email).all()
 
+    friend_items = []
+    for item in private_items:
+        image_info = ("<li><a href='#'><img src='{}' data-title='{}' data-id='{}'"
+            "data-lat='{}' data-lon='{}' data-tour='{}' data-complete='{}' data-country='{}'"
+            "data-address='{}' data-image='{}'"
+            "class='friend-image public-image'><span class='text-content'>{}</span></a></li>"
+                                ).format(item.public_item.image, item.public_item.title, 
+                                item.id, item.public_item.latitude, item.public_item.longitude, 
+                                item.tour_link, item.checked_off, item.public_item.country, 
+                                item.public_item.address.encode("utf-8"), item.public_item.image, item.public_item.title)
+        friend_items.append(image_info)
+    print friend_items
+
     return render_template('profile.html',
                             user=user,
                             private_items=private_items,
+                            friend_items=friend_items,
                             email=email,
                             lists=user_bucket_lists)
 
@@ -723,6 +737,20 @@ def process_search_form():
                             email=email,
                             lists=lists)
 
+@app.route('/search-items.json')
+def get_search_matched_items():
+
+    country_name = request.args.get("country-name")
+    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+
+    images = []
+    for item in matched_items:
+        image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
+        images.append(image_info)
+
+    return jsonify(images)
+
+
 @app.route('/search/country', methods=['GET', 'POST'])
 def search_country_items():
     """Displays choropleth map and queries public items table for items in a country. Returns matches"""
@@ -744,17 +772,15 @@ def search_country_items():
                                email=email)
 
     else:
-        country_name = request.form.get("country-name")
-
         email = session.get('email')
         lists = BucketList.query.filter(BucketList.email==email).all()
-
+        country_name = request.form.get("country-name")
         matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
 
         return render_template("search-results.html",
-                                matched_items=matched_items,
                                 email=email,
-                                lists=lists)
+                                lists=lists,
+                                matched_items=matched_items)
 
 @app.route('/search/country/user-items')
 def search_items_by_country_per_user():
