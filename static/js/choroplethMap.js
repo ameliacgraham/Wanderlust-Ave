@@ -212,7 +212,11 @@ d3.json("/countries.json", function(err, data) {
             $("#country-name").val(country);
             console.log($("#country-name").val());
             $("#country-form").submit();
-            });
+            // $.get("/search-items.json", {"country-name": country}, function(evt) {
+            //   window.location.assign('/search-results');
+            // });
+            // console.log("After page load", country);
+        });
     
     g.append("path")
         .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))

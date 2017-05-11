@@ -737,18 +737,19 @@ def process_search_form():
                             email=email,
                             lists=lists)
 
-@app.route('/search-items.json')
-def get_search_matched_items():
+# @app.route('/search-items.json')
+# def get_search_matched_items():
 
-    country_name = request.args.get("country-name")
-    matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
+#     country_name = request.args.get("country-name")
+#     matched_items =  PublicItem.query.filter(PublicItem.country==country_name).all()
 
-    images = []
-    for item in matched_items:
-        image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
-        images.append(image_info)
+#     images = []
+#     for item in matched_items:
+#         image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
+#         images.append(image_info)
+#     print images
 
-    return jsonify(images)
+#     return jsonify(images)
 
 
 @app.route('/search/country', methods=['GET', 'POST'])
@@ -781,6 +782,7 @@ def search_country_items():
                                 email=email,
                                 lists=lists,
                                 matched_items=matched_items)
+
 
 @app.route('/search/country/user-items')
 def search_items_by_country_per_user():

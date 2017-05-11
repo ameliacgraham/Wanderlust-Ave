@@ -126,32 +126,15 @@ span.text-content {
 <div id="search-image-div">
 <section id="photos">
   <ul id="public-images" class="img-list">
+    {% for match in matched_items %}
+      <li><a href='#'><img src='{{ match.image }}' data-title='{{ match.title }}' data-id='{{ match.id }}' class='public-image'><span class='text-content'>{{ match.title }}</span></a></li>
+    {% endfor %}
   </ul>
 </section>
 </div>
-<script>
-    $.get('/search-items.json', function(response) {
-        var images = response;
-        var allImages = "";
-        console.log(images);
-        images.forEach(function(element) {
-        allImages += element;
-        });
-        console.log(allImages)
-        $('#public-images').append(allImages);
-    })
-</script>
 
 
-<div id="search-results">
-  {% if matched_items %}
-    {% for item in matched_items %}
-      {{ item.title }} <br>
-        <input type="image" id="public-item-{{ item.id }}"src="{{ item.image }}" class="public-image" 
-              alt="Bucket Item" width="300" data-id="{{ item.id }}"><br> 
-    {% endfor %}
-  {% endif %} 
-</div>
+
 
 {% if email %}
 <div class="modal fade" id="add-private-item" tabindex="-1" role="dialog">
@@ -175,6 +158,5 @@ span.text-content {
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 {% endif %}
-
 
 {% endblock %}

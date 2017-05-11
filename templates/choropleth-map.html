@@ -54,7 +54,7 @@ svg {
 
 <div id="tooltip-container"></div>
 <div>
-<form action="/search-items.json" id="country-dropdown-form">
+<form action="/search/country" id="country-dropdown-form" method='POST'>
   <select name="country-name" id="country-dropdown">
     {% for country in countries %}
       <option value="{{ country }}">{{ country }}</option>
@@ -65,7 +65,7 @@ svg {
 
 <div id="canvas-svg"></div>
 
-<form action="/search-items.json" id="country-form" hidden>
+<form action="/search/country" id="country-form" hidden method='POST'>
   <input type="text" id="country-name" name="country-name" value="">
   <input type="submit">
 </form>
