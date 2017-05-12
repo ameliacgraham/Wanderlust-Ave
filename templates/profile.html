@@ -112,11 +112,15 @@ span.text-content {
   -o-transition: opacity 500ms;
   transition: opacity 500ms;
 }
+
+h2 {
+  text-align: center;
+}
 </style>
 {% endblock %}
 {% block content %}
 
-<h2>{{ user.first_name }}'s items</h2>
+<h2>{{ user.first_name }}'s bucket items</h2>
 <section class="photos">
   <ul id="friend-images" class="img-list">
   </ul>
