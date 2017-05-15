@@ -2,6 +2,7 @@
 {% block head %}
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="/static/js/progressWave.js" language="JavaScript"></script>
+<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
 <style>
   .liquidFillGaugeText {
     font-family: cursive; font-weight: bold
@@ -384,34 +385,34 @@ span.text-content {
       </div>
     </div> -->
     <div class="col-xs-12">
-      <p id="progress-message">You've completed {{ progress }} of your bucket items!</p><br>
       <input type="hidden" id="bucket-id" value="{{ b_list_id }}">
-      <br><br><br>
-      <p id="bucket-list-title"> {{ bucket_list.title }} </p>
-      <div id="create-item-button">
+      <p id="bucket-list-title" hidden> {{ bucket_list.title }} </p>
+      <div id="create-item-button" hidden>
         <a href="#" class="btn btn-xs btn-info button" id="create-new-item-button" data-list="{{ bucket_list.title }}"><span class="glyphicon glyphicon-plus"></span> Create new item</a>
       </div>
+      <p id="progress-message">You've completed {{ progress }} of your bucket items!</p><br>
       <svg id="fillgauge" width="97%" height="250" onclick="">
         <pattern id = "globe" height = "100%" width = "100%"            
                    patternContentUnits = "objectBoundingBox">
         <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
       </svg>
-        <p>Loading bucket items</p>
-      <div id="fountainG">
-        <div id="fountainG_1" class="fountainG"></div>
-        <div id="fountainG_2" class="fountainG"></div>
-        <div id="fountainG_3" class="fountainG"></div>
-        <div id="fountainG_4" class="fountainG"></div>
-        <div id="fountainG_5" class="fountainG"></div>
-        <div id="fountainG_6" class="fountainG"></div>
-        <div id="fountainG_7" class="fountainG"></div>
-        <div id="fountainG_8" class="fountainG"></div>
+      <div id="loading">
+        <div id="fountainG">
+          <div id="fountainG_1" class="fountainG"></div>
+          <div id="fountainG_2" class="fountainG"></div>
+          <div id="fountainG_3" class="fountainG"></div>
+          <div id="fountainG_4" class="fountainG"></div>
+          <div id="fountainG_5" class="fountainG"></div>
+          <div id="fountainG_6" class="fountainG"></div>
+          <div id="fountainG_7" class="fountainG"></div>
+          <div id="fountainG_8" class="fountainG"></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="map-list-view-buttons">
+<div id="map-list-view-buttons" hidden>
   <a href="#" class="btn btn-sm btn-info button" id="map-view">Map View</a>
   <button class="button" id="list-view" hidden>List View</button>
 </div>
@@ -424,19 +425,19 @@ span.text-content {
         console.log(checkedOffItems);
         var percentComplete = results['percentage_complete'];
         console.log(percentComplete);
-        var gauge = loadLiquidFillGauge("fillgauge", percentComplete, config);
+        var gauge = setTimeout(function() {loadLiquidFillGauge("fillgauge", percentComplete, config);
         var config = liquidFillGaugeDefaultSettings();
         config.textVertPosition = 0.8;
         config.waveAnimateTime = 5000;
         config.waveHeight = 0.15;
         config.waveOffset = 0.25;
-        config.valueCountUp = false;
-        config.displayPercent = false;
-
+        config.valueCountUp = true;
+        config.displayPercent = true;
+        }, 800);
     });
 
 </script>
-<div id="private-items-div">
+<div id="private-items-div" hidden>
 <section id="photos">
   <ul id="private-images" class="img-list">
   </ul>
@@ -692,6 +693,19 @@ span.text-content {
       map.setCenter(center);
     });
   }
+
+  $('#private-items-div').imagesLoaded( function() {
+    // images have loaded
+    console.log('images loaded');
+    $("#private-items-div").show();
+    $("#bucket-list-title").show();
+    $("#create-item-button").show();
+    $("#map-list-view-buttons").show();
+    $("#fillgauge").hide();
+    $("#progress-message").hide();
+    $("#loading").hide();
+
+  });
 </script>
 </div>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ gm_api_key }}&libraries=places&callback=initalizeGoogleMaps" async defer></script>
