@@ -122,19 +122,25 @@ span.text-content {
 #search-image-div {
   margin: 0 50px 20px 50px;
 }
+
+h2 {
+  text-align: center;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
+<h2>{{ country_name }}</h2>
+
 <div id="search-image-div">
-<section id="photos">
-  <ul id="public-images" class="img-list">
-    {% for match in matched_items %}
-      <li><a href='#'><img src='{{ match.image }}' data-title='{{ match.title }}' data-id='{{ match.id }}' class='public-image'><span class='text-content'>{{ match.title }}</span></a></li>
-    {% endfor %}
-  </ul>
-</section>
+  <section id="photos">
+    <ul id="public-images" class="img-list">
+      {% for match in matched_items %}
+        <li><a href='#'><img src='{{ match.image }}' data-title='{{ match.title }}' data-id='{{ match.id }}' class='public-image'><span class='text-content'>{{ match.title }}</span></a></li>
+      {% endfor %}
+    </ul>
+  </section>
 </div>
 
 

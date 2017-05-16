@@ -767,7 +767,8 @@ def search_country_items():
         return render_template("search-results.html",
                                 email=email,
                                 lists=lists,
-                                matched_items=matched_items)
+                                matched_items=matched_items,
+                                country_name=country_name)
 
 
 @app.route('/search/country/user-items')
@@ -788,7 +789,8 @@ def search_items_by_country_per_user():
     return render_template("private-search.html",
                             matched_items=matched_items,
                             email=email,
-                            lists=bucket_lists)
+                            lists=bucket_lists,
+                            country=country)
 
 
 @app.route('/countries.json')
