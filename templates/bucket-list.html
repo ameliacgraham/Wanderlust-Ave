@@ -3,7 +3,10 @@
 <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
 <script src="/static/js/progressWave.js" language="JavaScript"></script>
 <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <style>
+
   .liquidFillGaugeText {
     font-family: cursive; font-weight: bold
     }
@@ -370,6 +373,33 @@ span.text-content {
     margin-left:auto; margin-right:auto; display:block;
   }
 
+  .ui-state-default {
+    margin: 0 5px 5px 0;
+    font-size: 1.2em;
+    width: 120px;
+  }
+
+  #sortable-itinerary {
+    height: 300px;
+  }
+
+  .sortable-div {
+    display: inline-block;
+    vertical-align: top;
+    width: 150px;
+    border: 2px solid black;
+  }
+
+  li {
+    list-style: none;
+    margin: 0;
+  }
+
+  ul {
+    margin-left: auto;
+    padding-left: 0;
+  }
+
 </style>
 {% endblock %}
 
@@ -437,6 +467,35 @@ span.text-content {
     });
 
 </script>
+
+<div id='sortable-itinerary'>
+  {% for day in range(num_of_days) %}
+    <div class="sortable-div">
+    <ul id="sortable{{ day +1}}" class='connectedSortable'>
+      Day {{day + 1}}
+      <li class="ui-state-default">Draggable</li>
+    </ul>
+    </div>
+  {% endfor %}
+</div>
+
+
+<script>
+  $( function() {
+    var sortables = '';
+    for (i = 0; i < {{ num_of_days + 1}}; i++) {
+      sortables += "#sortable";
+      sortables += i;
+      sortables += ", ";
+    }
+    console.log(sortables.slice(0,-2));
+    $(sortables.slice(0,-2)).sortable({
+      connectWith: ".connectedSortable"
+    }).disableSelection();
+  } );
+</script>
+
+
 <div id="private-items-div" hidden>
 <section id="photos">
   <ul id="private-images" class="img-list">
@@ -446,11 +505,9 @@ span.text-content {
 <script>
         var images = {{ images | safe }};
         var allImages = "";
-        console.log(images);
         images.forEach(function(element) {
         allImages += element;
         });
-        console.log(allImages)
         $('#private-images').append(allImages);
 </script>
 

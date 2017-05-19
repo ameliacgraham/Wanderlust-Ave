@@ -510,7 +510,8 @@ def display_bucket_list(list_id):
                            progress=progress,
                            email=email,
                            images=images,
-                           checked_off_items=checked_off_items)
+                           checked_off_items=checked_off_items,
+                           num_of_days=5)
 
 # def get_bucket_items(list_id):
 #     email = session.get('email')
