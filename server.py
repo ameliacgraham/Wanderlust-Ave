@@ -502,6 +502,8 @@ def display_bucket_list(list_id):
     checked_off_items = PrivateItem.query.filter(PrivateItem.list_id==b_list_id, PrivateItem.checked_off==True).count()
     progress = str(checked_off_items) + "/" + str(all_list_items)
 
+    titles = [item.public_item.title for item in bucket_list.priv_items]
+
     return render_template("bucket-list.html", 
                            bucket_list=bucket_list,
                            b_list_id=b_list_id,
@@ -511,7 +513,8 @@ def display_bucket_list(list_id):
                            email=email,
                            images=images,
                            checked_off_items=checked_off_items,
-                           num_of_days=5)
+                           num_of_days=5,
+                           titles=titles)
 
 # def get_bucket_items(list_id):
 #     email = session.get('email')

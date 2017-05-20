@@ -388,6 +388,7 @@ span.text-content {
     vertical-align: top;
     width: 150px;
     border: 2px solid black;
+    margin-left: 20px;
   }
 
   li {
@@ -473,10 +474,14 @@ span.text-content {
     <div class="sortable-div">
     <ul id="sortable{{ day +1}}" class='connectedSortable'>
       Day {{day + 1}}
-      <li class="ui-state-default">Draggable</li>
     </ul>
     </div>
   {% endfor %}
+  <ul id="sortable0" class="connectedSortable">Items
+    {% for title in titles %}
+    <li class="ui-state-default">{{ title }}</li>
+    {% endfor %}
+  </ul>
 </div>
 
 
