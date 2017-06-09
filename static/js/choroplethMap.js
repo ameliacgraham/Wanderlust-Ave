@@ -110,6 +110,7 @@ d3.json("/countries.json", function(err, data) {
   
   var svg = d3.select("#canvas-svg").append("svg")
       .attr("width", width)
+      .attr("preserveAspectRatio", "xMidYMin")
       .attr("height", height);
   
   svg.append("path")

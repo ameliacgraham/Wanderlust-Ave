@@ -1,94 +1,15 @@
-<!doctype html>
-<html>
 <head>
-<script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
-<script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=1322395004515505"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
-<!-- <div class="fb-login-button" data-max-rows="1" data-size="large" data-show-faces="true" 
-scope="public_profile,email" data-auto-logout-link="true" onlogin="checkLoginState();"></div> -->
-<div id="fb-root"></div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=1322395004515505"></script>
+  <link rel="shortcut icon" href="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Navbar Template for Bootstrap</title>
-  <link rel="stylesheet"
-        href="http://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/united/bootstrap.min.css">
-<style>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
 
-/*body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  position: relative;
-}*/
-/*D3 Map*/
-#canvas {
-}
-
-
-#canvas-svg {
-}
-
-
-.land {
-  fill: #222;
-}
-
-.boundary {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1px;
-}
-
-#tooltip-container {
-  position: absolute;
-  background-color: #fff;
-  color: #000;
-  padding: 10px;
-  border: 1px solid;
-  display: none;
-}
-
-.tooltip_key {
-  font-weight: bold;
-}
-
-.tooltip_value {
-  margin-left: 20px;
-  float: right;
-}
-
-/*Progress Wave*/
-.liquidFillGaugeText { font-family: Times New Roman; font-weight: bold; }
-
-/*Doughnut Chart*/
-.arc text {
-  font: 10px sans-serif;
-  text-anchor: middle;
-}
-
-.arc path {
-  stroke: #fff;
-}
-
-.navbar navbar-inverse {
-  background-color: gray;
-}
-
-#wanderlust-ave-nav {
-  color: #006C7D;
-}
-
-a {
-  font-family: Georgia;
-}
-
-body {
-  background: url("https://s3-us-west-1.amazonaws.com/wanderlist-images/wavegrid.png");
-}
-
-</style>
 </head>
-
-
-<!-- <nav class="navbar navbar-default">
+<body id="homepage-body">
+  <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button"
@@ -102,302 +23,52 @@ body {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Wanderlust Ave</a>
+      <a class="navbar-brand" id="wanderlust-ave-nav" href="/">Wanderlust Ave</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li><a href="#" id="my-lists-button">My Lists</a></li>
+        {% if email %}
+          <li><a href="/my-lists" id="my-lists-button">My Lists</a></li>
+        {% endif %}
         <li class="dropdown">
           <a href="#"
              class="dropdown-toggle"
              data-toggle="dropdown"
              role="button"
              aria-expanded="false">
-            Exlpore <span class="caret"></span></a>
+            Explore <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-            <li><a href="#" id="trip-planner">Trip Ideas</a></li>
-            <li><a href="#" id="search-by-country">Explore by Country</a></li>
-            <li><a href="#" id="facebook-friends">Facebook Friends</a></li>
-            <li><a href="#" id="total-progress">Total Progress</a></li> -->
-<!--             <li class="divider"></li>
-            <li class="dropdown-header">Nav header</li>
-            <li><a href="#">Separated link</a></li>
-            <li><a href="#">One more separated link</a></li> -->
-<!--           </ul>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#" id="login-button-modal">Login</a></li>
-      </ul>
-    </div>
-  </div>
-</nav> -->
-<!--         <form class="navbar-form navbar-left" action="/search">
-          <div class="form-group">
-            <input type="text" id="keyword-search" name="public-search" class="form-control" placeholder="Search" value="">
-          </div>
-        <button type="submit" id="search-button" class="btn btn-default">Submit</button>
-        </form> -->
-<body>
-  <nav class="navbar navbar-default">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button type="button"
-                class="navbar-toggle collapsed"
-                data-toggle="collapse"
-                data-target="#navbar"
-                aria-expanded="false"
-                aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" id="wanderlust-ave-nav" href="/">Wanderlust Ave</a>
-      </div>
-      <div id="navbar" class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="/my-lists" id="my-lists-button">My Lists</a></li>
-          <li class="dropdown">
-            <a href="#"
-               class="dropdown-toggle"
-               data-toggle="dropdown"
-               role="button"
-               aria-expanded="false">
-              Exlpore <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
+            {% if email %}
+              <li><a href="/facebook/friends" id="facebook-friends">Facebook Friends</a></li>
+              <li><a href="/profile-user" id="trip-planner">Trip Ideas</a></li>
+            {% endif %}
               <li><a href="/popular-items">Popular Bucket Items</a></li>
               <li><a href="/search/country" id="search-by-country">Explore by Country</a></li>
-              {% if email %}
-                <li><a href="/facebook/friends" id="facebook-friends">Friends</a></li>
-                <li><a href="/profile-user" id="trip-planner">Trip Ideas</a></li>
-              {% endif %}
-  <!--             <li class="divider"></li>
-              <li class="dropdown-header">Nav header</li>
-              <li><a href="#">Separated link</a></li>
-              <li><a href="#">One more separated link</a></li> -->
-            </ul>
-          </li>
-        </ul>
-          <div class="col-sm-3 col-md-3">
-            <form class="navbar-form" role="search">
+          </ul>
+        </li>
+      </ul>
+                <div class="col-sm-3 col-md-3">
+            <form action="/search" class="navbar-form" role="search">
               <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search" name="q">
+                <input type="text" class="form-control" placeholder="Search" name="public-search">
                   <div class="input-group-btn">
                     <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                   </div>
               </div>
             </form>
           </div>
-        <ul class="nav navbar-nav navbar-right">
-          {% if email %}
-            <li><a href="/logout">Logout</a></li>
-          {% else %}
-            <li><a href="#login" id="login-button-modal">Login</a></li>
-          {% endif %}
-        </ul>
-      </div>
+      <ul class="nav navbar-nav navbar-right">
+        {% if email %}
+          <li><a href="/logout" id="logout-button">Logout</a></li>
+        {% else %}
+          <li><a href="#register" id="register-button">Sign Up</a></li>
+          <li><a href="#" id="login-button-modal">Login</a></li>
+        {% endif %}
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
   <div class="modal fade" id="login-modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Login</h4>
-      </div>
-      <div class="modal-body">
-        <form action="/login" method="POST">
-          <label>Email:</label>
-            <input type="text" name="email" id="email-login" placeholder="email" required><br><br>
-          <label>Password:</label>
-            <input type="password" name="password" id="password-login" placeholder="password" required><br><br>
-            <input type="submit" id="login-modal-submit"value="Login">
-            <fb:login-button scope="public_profile,email,user_friends" id="facebook-login" onlogin="checkLoginState();">
-            </fb:login-button>
-        </form>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<script src="/static/js/loginModal.js"></script>
-<script src="/static/js/facebook.js"></script>
-  {% block content %} put your content here {% endblock %}
-</body>
-</html>
-<script>
-  // $("#search-by-country").on("click", function() {
-  //   $("#search-by-country-div").show();
-  //   $("#public-items-div").hide();
-  //   $("#facebook-friends-div").hide();
-  //   $("#my-lists-div").hide();
-  //   $("#total-progress-div").hide();
-  //   $("#trip-ideas-div").hide();
-  //   $("#country-svg").attr("height", 0);
-  //   $("#country-svg").attr("width", 0);
-  //   $("#friend-svg").attr("height", 0);
-  //   $("#friend-svg").attr("width", 0);
-  // })
-  $("#facebook-friends").on("click", function() {
-    $("#facebook-friends-div").show();
-    $("#public-items-div").hide();
-    $("#search-by-country-div").hide();
-    $("#my-lists-div").hide();
-    $("#total-progress-div").hide();
-    $("#trip-ideas-div").hide();
-    $("#country-svg").attr("height", 0);
-    $("#country-svg").attr("width", 0);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-  })
-  $("#trip-planner").on("click", function() {
-    $("#country-svg").attr("height", 500);
-    $("#country-svg").attr("width", 960);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-    $("#trip-ideas-div").show();
-    $("#total-progress-div").hide();
-    $("#my-lists-div").hide();
-    $("#facebook-friends-div").hide();
-    $("#public-items-div").hide();
-    $("#search-by-country-div").hide();
-    $("#max-country-info").show();
-    $("#max-friend-info").hide();
-    $("#friend-analysis-button").on("click", function(){
-      $("#country-analysis-button").show();
-      $("#friend-analysis-button").hide();
-      $("#country-svg").attr("height", 0);
-      $("#country-svg").attr("width", 0);
-      $("#max-friend-info").show();
-      $("#max-country-info").hide();
-      $("#friend-svg").attr("height", 500);
-      $("#friend-svg").attr("width", 960);
-      })
-    $("#country-analysis-button").on("click", function(){
-      $("#country-analysis-button").hide();
-      $("#friend-analysis-button").show();
-      $("#country-svg").attr("height", 500);
-      $("#country-svg").attr("width", 960);
-      $("#friend-svg").attr("height", 0);
-      $("#friend-svg").attr("width", 0);
-      $("#max-country-info").show();
-      $("#max-friend-info").hide();
-    })
-
-  })
-  // $("#my-lists-button").on("click", function() {
-  //   $("#my-lists-div").show();
-  //   $("#facebook-friends-div").hide();
-  //   $("#public-items-div").hide();
-  //   $("#search-by-country-div").hide();
-  //   $("#total-progress-div").hide();
-  //   $("#trip-ideas-div").hide();
-  //   $("#country-svg").attr("height", 0);
-  //   $("#country-svg").attr("width", 0);
-  //   $("#friend-svg").attr("height", 0);
-  //   $("#friend-svg").attr("width", 0);
-  // })
-  $("#inspiration").on("click", function() {
-    $("#public-items-div").show();
-    $("#total-progress-div").hide();
-    $("#my-lists-div").hide();
-    $("#facebook-friends-div").hide();
-    $("#search-by-country-div").hide();
-    $("#trip-ideas-div").hide();
-    $("#country-svg").attr("height", 0);
-    $("#country-svg").attr("width", 0);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-    $.get("/my-lists", function(response) {
-      $("#list-title").html("");
-      for (i = 0; i < response.lists.length; i++) { 
-        $("#list-title").append("<option value='" + response.lists.title + "'>" + response.lists.title + "</option>");
-      }
-    });
-  })
-  $("#total-progress").on("click", function() {
-    $("#total-progress-div").show();
-    $("#my-lists-div").hide();
-    $("#facebook-friends-div").hide();
-    $("#public-items-div").hide();
-    $("#search-by-country-div").hide();
-    $("#trip-ideas-div").hide();
-    $("#max-country-info").hide();
-    $("#country-svg").attr("height", 0);
-    $("#country-svg").attr("width", 0);
-    $("#friend-svg").attr("height", 0);
-    $("#friend-svg").attr("width", 0);
-  })
-  $("wanderlust-ave-button").on("click", function() {
-    window.location.assign("/");
-  })
-
-</script>
-
-  <!--Use "container-fluid" for a responsive page that
-      spans the width of the screen. -->
-
-  <!--REST OF PAGE CONTENT-->
-
-
-
-<div id="status">
-</div>
-<div class="modal fade" id="facebook-login-registration" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"></h4>
-      </div>
-      <div class="modal-body">
-        <form action='/facebook/login' id="email-username-submit" method='POST'>
-          Please enter an email address and username.<br>
-          This will allow you to login to WanderList without Facebook,<br>
-          if you wish in the future.<br>
-          Username: <input id="username-facebook-login" type="text" name="username-facebook-login"><br>
-          Email: <input id="email-login-facebook" type="text" name="email">
-          <input type="hidden" name="id" id="facebook-id">
-          <input type="hidden" name="name" id="facebook-name">
-          <input type="hidden" name="new" value="true">
-
-          <input type="submit" value="submit">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
-<!-- {% if email %}
-<div class="modal fade" id="add-private-item" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Add Item</h4>
-      </div>
-      <div class="modal-body">
-        <form action='/add-item/public' id='public-item-modal' method='POST' novalidate>
-            List: <select name="list" id='list-title'>
-              {% for list in lists %}
-                <option value="{{ list.title }}">{{ list.title }}</option>
-              {% endfor %}
-            </select><br><br>
-          <input type='hidden' id='public-id'>
-          <input type='submit' value='Add Item'>
-        </form>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-{% endif %} -->
-
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -445,153 +116,10 @@ body {
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<!--//////////////////////////// -->
-<div id="nav-bar-info">
-<!--   <div id="search-by-country-div" hidden>
-    <div id="tooltip-container"></div>
-    <form action="/search/country" id="country-dropdown-form" method='GET'>
-      <select name="country-name" id="country-dropdown">
-        {% for country in country_names %}
-          <option value="{{ country }}">{{ country }}</option>
-        {% endfor %}
-      </select>
-      <input type="submit" name="country-search-dropdown-button" value="Search">
-    </form>
-
-    <div id="canvas-svg"></div>
-
-    <form action="/search/country" id="country-form" hidden>
-      <input type="text" id="country-name" name="country-name" value="">
-      <input type="submit">
-    </form>
-  </div> -->
-
-  <div id="public-items-div">
-  {% if public_items %}
-    {% for item in public_items %}
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ item.title }} <br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="image" src="{{ item.image }}" class="public-image" 
-              alt="Bucket Item" width="128" height="128" data-id="{{ item.id }}" data-title="{{ item.title }}"><br><br><br>
-    {% endfor %}
-  {% endif %}
-  </div>
-  <div id="facebook-friends-div" class="facebook-friends" hidden>
-  {% if friends %}
-    {% for friend in friends %}
-    <a href="/profile/{{ friend.facebook_id }}">{{ friend.first_name }} {{ friend.last_name }}</a><br>
-    <img src="{{ friend.profile_picture }}" alt="Profile Picture" width="128" height="128"></a><br>
-    {% endfor %}
-  {% else %}
-    Please sign in to Facebook to View your Facebook Friend's lists
-  {% endif %}
-
-  </div>
-  <div id="my-lists-div" hidden>
-    <button id="create-new-list-button">Create a new list</button><br>
-
-    Progress: {{ checked_off_items }} / {{ items }}<br><br>
-      <ul id="list-links">
-        {% if lists %}
-          {% for list in lists %}
-            <li><a href="/my-lists/{{ list.id }}" id="list{{ list.id }}">{{ list.title }}</a></li>
-          {% endfor %}
-        {% endif %}
-      </ul>
-
-    {% if email %}
-    <div class="modal fade" id="add-bucket-list" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Create A List</h4>
-          </div>
-          <div class="modal-body">
-            <form action="/my-lists" id='list-modal' method='POST'>
-              <label>Title: </label>
-                <input type="text" name="title" id="list-name" placeholder="My Bucket List"><br><br>
-                <input type="hidden" name="email" id="email" value={{ session["email"] }}>
-                <input type="submit" value="Create">
-            </form>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    {% endif %}
-  </div>
-  <div id="total-progress-div" hidden>
-    <svg id="fillgauge" width="100%" height="250" onclick="">
-      <pattern id = "globe" height = "100%" width = "100%"            
-                       patternContentUnits = "objectBoundingBox">
-           <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
-         </pattern>
-     </svg>
-    <script src="/static/js/progressWave.js" language="JavaScript"></script>
-    <script language="JavaScript">
-        $.get('/progress.json', {"all_items": "True"}, function(results) {
-            var items = results['total_items'];
-            console.log(items);
-            var checkedOffItems = results['checked_items'];
-            console.log(checkedOffItems);
-            var percentComplete = results['percent_complete'];
-            console.log(percentComplete);
-            var gauge = loadLiquidFillGauge("fillgauge", percentComplete, config);
-            var config = liquidFillGaugeDefaultSettings();
-            config.textVertPosition = 0.8;
-            config.waveAnimateTime = 5000;
-            config.waveHeight = 0.15;
-            config.waveOffset = 0.25;
-            config.valueCountUp = false;
-            config.displayPercent = false;
-
-        });
-    </script>
-  </div>
-  <div id="trip-ideas-div" hidden>
-    <p id="max-country"></p>
-    <div id="country-doughnut-div">
-      <form action="/search/country/user-items" id="country-user-items-form" hidden>
-        <input type="text" id="country-name-user" name="country-name-user" value="">
-        <input type="submit">
-      </form>
-
-      <svg height="0">
-      <pattern id = "globe-doughnut" height = "100%" width = "100%"            
-                         patternContentUnits = "objectBoundingBox">
-             <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
-      </pattern>
-      </svg>
-      <button id="country-analysis-button" hidden>Countries Analysis</button>
-      <button id="friend-analysis-button">Facebook Friends Analysis</button>
-
-      <div id="max-country-info">
-        <span id="max-country">You have the most uncompleted bucket items in </span>
-      </div>
-    </div>
-    <div id="friend-doughnut-div">
-      <div id="max-friend-info">
-        <span id="max-friend">You have the most items in common with </span>
-      </div>
-      <svg>
-        <pattern id = "globe-facebook" height = "100%" width = "100%"            
-                     patternContentUnits = "objectBoundingBox">
-         <image xlink:href = "https://s3-us-west-1.amazonaws.com/wanderlist-images/imageedit_1_8128406755.png" preserveAspectRatio = "none" width = "1.00" height = "1.00"/>
-        </pattern>
-      </svg>
-      <form action="/facebook-email" id="facebook-email-form" method='POST' hidden>
-        <input type="text" id="friend-email" name="friend-email" value="">
-        <input type="submit">
-      </form>
-    </div>
-  </div>
-</div>
-
-<script src="/static/js/addListModal.js"></script>
-<script src="/static/js/facebook.js"></script>
 <script src="/static/js/loginModal.js"></script>
+<script src="/static/js/facebook.js"></script>
 <script src="/static/js/registrationModal.js"></script>
-<script src="/static/js/countryDoughnut.js"></script>
-<script src="/static/js/facebookDoughnut.js"></script>
-
-{% endblock %}
+<script src="/static/js/addItemFromModals.js"></script>
+  <br><br><br><br><br><br>
+  <p id="adventure-awaits">ADVENTURE &nbsp;AWAITS</p>
+</body>

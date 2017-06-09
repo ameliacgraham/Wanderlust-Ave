@@ -57,7 +57,7 @@ def display_homepage():
         items = progress_results['total_items']
         checked_off_items = progress_results['checked_items']
 
-    return render_template("explore.html",
+    return render_template("homepage.html",
                             email=email) 
                            # public_items=public_items,
                            # lists=lists,
@@ -171,25 +171,26 @@ def login_user():
     url = 'https://graph.facebook.com/v2.8/me?fields=id%2Cname%2Cfriends%7Bid%2Cname%7D&access_token={}'.format(token)
     r = requests.get(url)
     results = json.loads(r.text)
+    print results
+    # if results:
+    #     friends = []
+    #     for friend in results['friends']['data']:
+    #         facebook_id = str(friend['id'])
+    #         friends.append(facebook_id)
 
-    friends = []
-    for friend in results['friends']['data']:
-        facebook_id = str(friend['id'])
-        friends.append(facebook_id)
-
-    for facebook_id in friends:
-        # Find friend's user information
-        fb_friend = User.query.filter(User.facebook_id==facebook_id).first()
-        print fb_friend
-        # If it finds it, get the email
-        if fb_friend:
-            friend_email = fb_friend.email
-            email = request.form.get('email')
-            friend_query = Friend.query.filter(Friend.user==email, Friend.fb_friend==friend_email).first()
-            if not friend_query:
-                friendship = Friend(user=email, fb_friend=friend_email)
-                db.session.add(friendship)
-    db.session.commit()
+    #     for facebook_id in friends:
+    #         # Find friend's user information
+    #         fb_friend = User.query.filter(User.facebook_id==facebook_id).first()
+    #         print fb_friend
+    #         # If it finds it, get the email
+    #         if fb_friend:
+    #             friend_email = fb_friend.email
+    #             email = request.form.get('email')
+    #             friend_query = Friend.query.filter(Friend.user==email, Friend.fb_friend==friend_email).first()
+    #             if not friend_query:
+    #                 friendship = Friend(user=email, fb_friend=friend_email)
+    #                 db.session.add(friendship)
+    #     db.session.commit()
 
     return redirect('/')
 
@@ -625,13 +626,14 @@ def process_add_bucket_item():
             db.session.add(item)
             db.session.commit()
         public_id = item.id
-        b_list = BucketList.query.filter(BucketList.title==list_title).first()
+        email = session.get('email')
+        b_list = BucketList.query.filter(BucketList.title==list_title, BucketList.email==email).first()
         b_list_id = b_list.id
         create_private_item(public_id, b_list_id, tour_link)
         return redirect('/my-lists/{}'.format(b_list_id))
 
 def create_private_item(public_id, list_id, tour_link):
-    email = session['email']
+    email = session.get('email')
     print public_id
     print list_id
     print email
@@ -739,7 +741,8 @@ def process_search_form():
     return render_template('search-results.html', 
                             matched_items=matched_items,
                             email=email,
-                            lists=lists)
+                            lists=lists,
+                            country_name=form_input)
 
 
 @app.route('/search/country', methods=['GET', 'POST'])
