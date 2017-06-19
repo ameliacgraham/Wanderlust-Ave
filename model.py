@@ -191,6 +191,35 @@ class Country(db.Model):
 
         return "<Country id: {} code: {} name: {}>".format(self.id, self.code, self.name)
 
+class Month(db.Model):
+    """Month information."""
+
+    __tablename__ = "months"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    num = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(10), nullable=False)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Month id: {} num: {} name: {}>".format(self.id, self.num, self.name)
+
+class CountryMonth(db.Model):
+    """Association table for countries and shoulder months."""
+
+    __tablename__ = "country_months"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"), nullable=False)
+    month = db.Column(db.String(10), db.ForeignKey("months.id"), nullable=False)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""  
+
+        return "<CountryMonth id: {} country: {} month: {}>".format(self.id, self.country_id, self.month)
+
+
 class City(db.Model):
     """Information about cities."""
 

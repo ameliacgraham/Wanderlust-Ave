@@ -11,7 +11,7 @@ import facebook
 import os
 import requests
 import json
-import bcrypt
+from bcrypt import hashpw, gensalt
 import operator
 
 
@@ -75,7 +75,9 @@ def process_registation_form():
     email = request.form.get('email')
     first_name = request.form.get('first-name')
     last_name = request.form.get('last-name')
-    password = request.form.get('password')
+    password = str(request.form.get('password'))
+    # Hash a password for the first time, with a randomly-generated salt
+    hashed = hashpw(password, gensalt())
     # hashed_pw = bcrypt.hashpw(password.encode("UTF_8"),bcrypt.gensalt())
     email_query = User.query.filter(User.email==email).all()
 
@@ -83,7 +85,7 @@ def process_registation_form():
         flash("An account for {} already exists!".format(email))
         return redirect("/")
     else:
-        user = User(email=email, password=password, first_name=first_name,
+        user = User(email=email, password=hashed, first_name=first_name,
                     last_name=last_name, username=username)
         db.session.add(user)
         db.session.commit()
@@ -95,15 +97,16 @@ def process_login_info():
 
     email = request.form.get("email")
     print email
-    password = request.form.get("password")
+    password = str(request.form.get("password"))
     print password
     
 
-    user_query = User.query.filter(User.email==email).first()
-    username = user_query.username
-    if user_query and user_query.password == password:
+    user = User.query.filter(User.email==email).first()
+    username = user.username.encode("utf-8")
+    hashed = user.password.encode("utf-8")
+    if user and hashpw(password, hashed) == hashed:
         session["username"] = username
-        session["email"] = user_query.email
+        session["email"] = user.email
         return redirect("/")
     else:
         return "Email or Password is incorrect. Please try again!"
@@ -142,6 +145,9 @@ def login_user():
     if new == "true":
         email = request.form.get('email')
         password = request.form.get('id')
+        password = b, password
+        # Hash a password for the first time, with a randomly-generated salt
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         username = request.form.get('username')
         name = request.form.get('name')
         first_name, last_name = name.split()
@@ -151,7 +157,7 @@ def login_user():
         r = requests.get(picture_url)
         picture = str(r.url)
 
-        user = User(email=email, password=password, first_name=first_name,
+        user = User(email=email, password=hashed, first_name=first_name,
                     last_name=last_name, username=username, facebook_id=password,
                     profile_picture=picture)
         db.session.add(user)

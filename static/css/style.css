@@ -43,7 +43,7 @@ body {
 }
 
 a, h1, h2, h3, h4, p, li, form, button, span {
-  font-family: Georgia;
+  font-family: sans-serif;
 }
 
 .button {
@@ -83,7 +83,7 @@ a:hover {
 #adventure-awaits {
   text-align: center;
   font-size: 50px;
-  font-family: Georgia;
+  font-family: sans-serif;
   color: white;
   }
 
@@ -97,7 +97,7 @@ a:hover {
 }
 
 a {
-  font-family: Georgia;
+  font-family: sans-serif;
 }
 
 
@@ -520,7 +520,7 @@ body {
 
 #popuar-items-heading {
   text-align: center;
-  font-family: Georgia;
+  font-family: sans-serif;
 }
 
 span.text-content {
