@@ -102,12 +102,13 @@ def process_login_info():
     
 
     user = User.query.filter(User.email==email).first()
-    username = user.username.encode("utf-8")
-    hashed = user.password.encode("utf-8")
-    if user and hashpw(password, hashed) == hashed:
-        session["username"] = username
-        session["email"] = user.email
-        return redirect("/")
+    if user:
+        hashed = user.password.encode("utf-8")
+        if hashpw(password, hashed) == hashed:
+            username = user.username.encode("utf-8")
+            session["username"] = username
+            session["email"] = user.email
+            return redirect("/")
     else:
         return "Email or Password is incorrect. Please try again!"
 
@@ -230,7 +231,7 @@ def get_public_item_info():
 
     images = []
     for item in public_items:
-        image_info = "<li><a href='#'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
+        image_info = "<li><a href='javascript:;'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
         images.append(image_info)
 
     return jsonify(images)
