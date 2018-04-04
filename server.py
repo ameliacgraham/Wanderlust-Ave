@@ -218,11 +218,15 @@ def display_public_items():
     public_items = PublicItem.query.all()
     email = session.get("email")
     lists = BucketList.query.filter(BucketList.email==email).all()
+    pages = len(public_items) / 12
+    if len(public_items) % 12 != 0:
+        pages += 1
 
     return render_template("public-items.html",
                             public_items=public_items,
                             email=email,
-                            lists=lists)
+                            lists=lists,
+                            pages=pages)
 
 @app.route('/popluar-items.json')
 def get_public_item_info():
@@ -230,7 +234,7 @@ def get_public_item_info():
     public_items = PublicItem.query.all()
 
     images = []
-    for item in public_items:
+    for item in public_items[:10]:
         image_info = "<li><a href='javascript:;'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
         images.append(image_info)
 
