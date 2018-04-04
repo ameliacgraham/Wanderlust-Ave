@@ -142,6 +142,10 @@ class PrivateItem(db.Model):
                                                                    self.list_id,
                                                                    self.public_item_id)
 
+    # def get_most_popular_items():
+    #     most_popular = PrivateItem.query(PrivateItem.public_item_id, func.count(PrivateItem.public_item_id)).group_by(PrivateItem.public_item_id).all()
+    #     return most_popular
+
 class Journal(db.Model):
     """Journals for private items."""
 

@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime, date
 from StringIO import StringIO
+from sqlalchemy import func
 import boto3
 import facebook
 import os
@@ -216,10 +217,11 @@ def log_user_out():
 @app.route('/popular-items/<page>')
 def display_public_items(page):
     public_items = PublicItem.query.all()
+    most_popular_counts = sorted(db.session.query(PrivateItem.public_item_id, func.count(PrivateItem.public_item_id)).group_by(PrivateItem.public_item_id).all())
     email = session.get("email")
     lists = BucketList.query.filter(BucketList.email==email).all()
-    pages = len(public_items) / 12
-    if len(public_items) % 12 != 0:
+    pages = len(most_popular_counts) / 12
+    if len(most_popular_counts) % 12 != 0:
         pages += 1
 
     return render_template("public-items.html",
@@ -233,13 +235,32 @@ def display_public_items(page):
 def get_public_item_info():
 
     public_items = PublicItem.query.all()
+    #sort by which items are most common among users
+    #SELECT public_item_id, COUNT(*) FROM private_items GROUP BY public_item_id;
+    # session.query(Table.column, func.count(Table.column)).group_by(Table.column).all()
+    most_popular_counts = sorted(db.session.query(PrivateItem.public_item_id, func.count(PrivateItem.public_item_id)).group_by(PrivateItem.public_item_id).all())
+    print most_popular_counts
     page = request.form.get('page')
     print page
     images = []
-    start = int(page) * 12 - 11
-    end = int(page) * 12 + 1
+    if int(page) == 1:
+        start = 0
+        end = 12
+    else:
+        start = int(page) * 12 - 11
+        end = int(page) * 12 + 1
 
-    for item in public_items[start:end]:
+    most_popular_items = []
+
+    for public_item in most_popular_counts:
+        public_item_id = public_item[0]
+        public_item = PublicItem.query.get(public_item_id)
+        print public_item
+        most_popular_items.append(public_item)
+
+
+    # for item in public_items[start:end]:
+    for item in most_popular_items[start:end]:
         image_info = "<li><a href='javascript:;'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
         images.append(image_info)
 
