@@ -213,8 +213,8 @@ def log_user_out():
     flash("You have successfully logged out!")
     return redirect("/")
 
-@app.route('/popular-items')
-def display_public_items():
+@app.route('/popular-items/<page>')
+def display_public_items(page):
     public_items = PublicItem.query.all()
     email = session.get("email")
     lists = BucketList.query.filter(BucketList.email==email).all()
@@ -226,15 +226,20 @@ def display_public_items():
                             public_items=public_items,
                             email=email,
                             lists=lists,
-                            pages=pages)
+                            pages=pages,
+                            page=page)
 
-@app.route('/popluar-items.json')
+@app.route('/popluar-items.json', methods=['POST'])
 def get_public_item_info():
 
     public_items = PublicItem.query.all()
-
+    page = request.form.get('page')
+    print page
     images = []
-    for item in public_items[:10]:
+    start = int(page) * 12 - 11
+    end = int(page) * 12 + 1
+
+    for item in public_items[start:end]:
         image_info = "<li><a href='javascript:;'><img src='{}' data-title='{}' data-id='{}' class='public-image'><span class='text-content'>{}</span></a></li>".format(item.image, item.title, item.id, item.title)
         images.append(image_info)
 

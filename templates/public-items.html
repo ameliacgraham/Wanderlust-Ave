@@ -27,7 +27,8 @@
 </section>
 </div>
 <script>
-    $.get('/popluar-items.json', function(response) {
+    var page = {{ page }}
+    $.post('/popluar-items.json', {"page": page}, function(response) {
         var images = response;
         var allImages = "";
         console.log(images);
@@ -99,7 +100,7 @@
 
 <ul class="pagination">
   {% for i in range(1, pages + 1) %}
-      <li><a href="#">{{ i }}</a></li>
+      <li><a href="/popular-items/{{ i }}">{{ i }}</a></li>
   {% endfor %}
 </ul>
 
