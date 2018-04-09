@@ -5,6 +5,8 @@ from model import connect_to_db, db, User, BucketList, PublicItem, PrivateItem, 
 from werkzeug.utils import secure_filename
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import datetime, date
+from PIL import Image
+from resizeimage import resizeimage
 from StringIO import StringIO
 from sqlalchemy import func
 import boto3
@@ -237,7 +239,6 @@ def get_public_item_info():
     public_items = PublicItem.query.all()
     #sort by which items are most common among users
     #SELECT public_item_id, COUNT(*) FROM private_items GROUP BY public_item_id;
-    # session.query(Table.column, func.count(Table.column)).group_by(Table.column).all()
     most_popular_counts = sorted(db.session.query(PrivateItem.public_item_id, func.count(PrivateItem.public_item_id)).group_by(PrivateItem.public_item_id).all())
     print most_popular_counts
     page = request.form.get('page')

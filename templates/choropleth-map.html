@@ -12,6 +12,7 @@
 <div>
 <form action="/search/country" id="country-dropdown-form" method='POST'>
   <select name="country-name" id="country-dropdown">
+    <option value="Choose">Choose a country</option>
     {% for country in countries %}
       <option value="{{ country }}">{{ country }}</option>
     {% endfor %}
